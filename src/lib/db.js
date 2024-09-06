@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -22,6 +22,9 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
     }
     if (!db.objectStoreNames.contains('reports')) {
       db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('notifications')) {
+      db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true });
     }
   },
 });
@@ -129,6 +132,24 @@ export async function addEchoReply(echoId, content) {
   };
   const id = await (await dbPromise).add('comments', reply);
   return { ...reply, id };
+}
+
+export async function getNotifications() {
+  return (await dbPromise).getAll('notifications');
+}
+
+export async function addNotification(notification) {
+  return (await dbPromise).add('notifications', {
+    ...notification,
+    createdAt: new Date().toISOString(),
+  });
+}
+
+export async function clearNotifications() {
+  const db = await dbPromise;
+  const tx = db.transaction('notifications', 'readwrite');
+  const store = tx.objectStore('notifications');
+  await store.clear();
 }
 
 // Initialize with some sample data
