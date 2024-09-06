@@ -1,22 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { getRecommendedEchoes } from '../lib/db';
-import EchoList from './EchoList';
+import React, { useState, useEffect } from 'react';
+import EchoCard from './EchoCard';
 
-const RecommendedEchoes = ({ userId }) => {
+const RecommendedEchoes = () => {
   const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      const recommendedEchoes = await getRecommendedEchoes(userId);
-      setRecommendations(recommendedEchoes);
-    };
-    fetchRecommendations();
-  }, [userId]);
+    // Fetch recommended echoes
+    // This is a placeholder for actual API calls
+    setRecommendations([
+      { id: 6, title: 'Recommended Echo 1', duration: '2:00', likes: 150, category: 'Recommended' },
+      { id: 7, title: 'Recommended Echo 2', duration: '1:30', likes: 120, category: 'Recommended' },
+    ]);
+  }, []);
 
   return (
-    <div>
+    <div className="mt-8">
       <h2 className="text-xl font-semibold mb-4">Recommended for You</h2>
-      <EchoList echoes={recommendations} />
+      <div className="space-y-4">
+        {recommendations.map((echo) => (
+          <EchoCard key={echo.id} echo={echo} />
+        ))}
+      </div>
     </div>
   );
 };

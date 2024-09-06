@@ -1,58 +1,32 @@
 import React, { useRef, useEffect } from 'react';
 
-const AudioWaveform = ({ audioUrl, isPlaying }) => {
+const AudioWaveform = ({ progress }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    let animationFrameId;
+    const width = canvas.width;
+    const height = canvas.height;
 
-    const drawWaveform = (audioBuffer) => {
-      const data = audioBuffer.getChannelData(0);
-      const step = Math.ceil(data.length / canvas.width);
-      const amp = canvas.height / 2;
+    // Clear the canvas
+    ctx.clearRect(0, 0, width, height);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.moveTo(0, amp);
+    // Draw the waveform
+    ctx.beginPath();
+    for (let i = 0; i < width; i++) {
+      const x = i;
+      const y = height / 2 + Math.sin(i * 0.1) * 20;
+      ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = '#3b82f6';
+    ctx.stroke();
 
-      for (let i = 0; i < canvas.width; i++) {
-        let min = 1.0;
-        let max = -1.0;
-        for (let j = 0; j < step; j++) {
-          const datum = data[(i * step) + j];
-          if (datum < min) min = datum;
-          if (datum > max) max = datum;
-        }
-        ctx.lineTo(i, (1 + min) * amp);
-        ctx.lineTo(i, (1 + max) * amp);
-      }
-
-      ctx.strokeStyle = '#3b82f6';
-      ctx.stroke();
-    };
-
-    const animate = () => {
-      // Add animation logic here if needed
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    fetch(audioUrl)
-      .then(response => response.arrayBuffer())
-      .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-      .then(audioBuffer => {
-        drawWaveform(audioBuffer);
-        if (isPlaying) {
-          animate();
-        }
-      });
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [audioUrl, isPlaying]);
+    // Draw the progress
+    const progressWidth = (progress / 100) * width;
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.5)';
+    ctx.fillRect(0, 0, progressWidth, height);
+  }, [progress]);
 
   return <canvas ref={canvasRef} className="w-full h-24" />;
 };

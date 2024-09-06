@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { ArrowDownUp } from 'lucide-react';
 import EchoCard from './EchoCard';
 import EchoPlaybackOverlay from './EchoPlaybackOverlay';
+import TrendingTopics from './TrendingTopics';
+import CategoryFilter from './CategoryFilter';
+import SearchEchoes from './SearchEchoes';
+import RecommendedEchoes from './RecommendedEchoes';
 
-const categories = ['All', 'Confessions', 'Life Advice', 'Love Stories'];
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
-
-const mockEchoes = [
-  { id: 1, title: 'Best Advice I Ever Received', duration: '1:30', likes: 120 },
-  { id: 2, title: 'My Biggest Confession', duration: '2:15', likes: 85 },
-  { id: 3, title: 'A Love Story to Remember', duration: '3:00', likes: 200 },
-];
 
 const HomeScreen = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('Trending');
   const [playingEcho, setPlayingEcho] = useState(null);
+  const [echoes, setEchoes] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    // Fetch echoes and categories from the API
+    // This is a placeholder for actual API calls
+    setEchoes([
+      { id: 1, title: 'Best Advice I Ever Received', duration: '1:30', likes: 120, category: 'Advice' },
+      { id: 2, title: 'My Biggest Confession', duration: '2:15', likes: 85, category: 'Confession' },
+      { id: 3, title: 'A Love Story to Remember', duration: '3:00', likes: 200, category: 'Love' },
+    ]);
+    setCategories(['All', 'Advice', 'Confession', 'Love', 'Travel', 'Music']);
+  }, []);
 
   const handlePlay = (echo) => {
     setPlayingEcho(echo);
@@ -31,19 +41,7 @@ const HomeScreen = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Echo Feed</h1>
       
-      <Tabs defaultValue={activeCategory} className="mb-4">
-        <TabsList>
-          {categories.map((category) => (
-            <TabsTrigger
-              key={category}
-              value={category}
-              onClick={() => setActiveCategory(category)}
-            >
-              {category}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <CategoryFilter categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Today's Top Echoes</h2>
@@ -56,11 +54,17 @@ const HomeScreen = () => {
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {mockEchoes.map((echo) => (
+      <TrendingTopics />
+
+      <SearchEchoes />
+
+      <div className="space-y-4 mt-4">
+        {echoes.map((echo) => (
           <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} />
         ))}
       </div>
+
+      <RecommendedEchoes />
 
       {playingEcho && (
         <EchoPlaybackOverlay echo={playingEcho} onClose={handleClosePlayback} />
