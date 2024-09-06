@@ -1,21 +1,37 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 3; // Increment the version to trigger an upgrade
+const DB_VERSION = 2; // Increment the version to trigger an upgrade
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
+    // Create object stores if they don't exist
     if (!db.objectStoreNames.contains('echoes')) {
       db.createObjectStore('echoes', { keyPath: 'id', autoIncrement: true });
     }
     if (!db.objectStoreNames.contains('categories')) {
       db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
     }
+    if (!db.objectStoreNames.contains('notifications')) {
+      db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('badges')) {
+      db.createObjectStore('badges', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('users')) {
+      db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('follows')) {
+      db.createObjectStore('follows', { keyPath: 'id', autoIncrement: true });
+    }
     if (!db.objectStoreNames.contains('reactions')) {
       db.createObjectStore('reactions', { keyPath: 'id', autoIncrement: true });
     }
     if (!db.objectStoreNames.contains('playlists')) {
       db.createObjectStore('playlists', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('achievements')) {
+      db.createObjectStore('achievements', { keyPath: 'id', autoIncrement: true });
     }
     if (!db.objectStoreNames.contains('reports')) {
       db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
@@ -39,8 +55,52 @@ export async function addCategory(category) {
   return (await dbPromise).add('categories', category);
 }
 
-export async function addReaction(echoId, reactionType) {
-  return (await dbPromise).add('reactions', { echoId, reactionType });
+export async function getNotifications() {
+  return (await dbPromise).getAll('notifications');
+}
+
+export async function addNotification(notification) {
+  return (await dbPromise).add('notifications', notification);
+}
+
+export async function clearNotifications() {
+  return (await dbPromise).clear('notifications');
+}
+
+export async function getBadges() {
+  return (await dbPromise).getAll('badges');
+}
+
+export async function addBadge(badge) {
+  return (await dbPromise).add('badges', badge);
+}
+
+export async function getUser(id) {
+  return (await dbPromise).get('users', id);
+}
+
+export async function addUser(user) {
+  return (await dbPromise).add('users', user);
+}
+
+export async function updateUser(user) {
+  return (await dbPromise).put('users', user);
+}
+
+export async function followUser(followerId, followedId) {
+  return (await dbPromise).add('follows', { followerId, followedId });
+}
+
+export async function unfollowUser(followerId, followedId) {
+  const db = await dbPromise;
+  const follow = await db.getAll('follows', IDBKeyRange.only([followerId, followedId]));
+  if (follow.length > 0) {
+    return db.delete('follows', follow[0].id);
+  }
+}
+
+export async function addReaction(echoId, userId, reactionType) {
+  return (await dbPromise).add('reactions', { echoId, userId, reactionType });
 }
 
 export async function removeReaction(reactionId) {
@@ -72,6 +132,17 @@ export async function searchEchoes(query, filters) {
   });
 }
 
-export async function reportEcho(echoId, reason) {
-  return (await dbPromise).add('reports', { echoId, reason, date: new Date() });
+export async function addAchievement(userId, achievementType) {
+  return (await dbPromise).add('achievements', { userId, achievementType, date: new Date() });
+}
+
+export async function reportEcho(echoId, userId, reason) {
+  return (await dbPromise).add('reports', { echoId, userId, reason, date: new Date() });
+}
+
+export async function getRecommendedEchoes(userId) {
+  const db = await dbPromise;
+  const user = await db.get('users', userId);
+  const allEchoes = await db.getAll('echoes');
+  return allEchoes.filter(echo => echo.category === user.preferredCategory).slice(0, 10);
 }
