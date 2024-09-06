@@ -7,6 +7,7 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { addEcho, getCategories } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const EchoCreationScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -43,24 +44,32 @@ const EchoCreationScreen = () => {
     setTranscription("This is a simulated transcription of the recorded echo.");
   };
 
-  const saveEcho = async () => {
-    const newEcho = {
-      title,
-      category,
-      duration: recordingTime,
-      isAnonymous,
-      transcription,
-      createdAt: new Date().toISOString(),
-    };
-    await addEcho(newEcho);
-    navigate('/');
+  const saveEcho = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    try {
+      const newEcho = {
+        title,
+        category,
+        duration: recordingTime,
+        isAnonymous,
+        transcription,
+        createdAt: new Date().toISOString(),
+      };
+      await addEcho(newEcho);
+      toast.success('Echo created successfully!');
+      navigate('/'); // Navigate to home page after successful creation
+    } catch (error) {
+      console.error('Error creating echo:', error);
+      toast.error('Failed to create echo. Please try again.');
+    }
   };
 
   return (
-    <div className="p-4">
+    <form onSubmit={saveEcho} className="p-4">
       <h2 className="text-2xl font-bold mb-4">Create New Echo</h2>
       <div className="mb-4">
         <Button
+          type="button"
           variant={isRecording ? (isPaused ? 'outline' : 'destructive') : 'default'}
           size="lg"
           className="w-full"
@@ -72,7 +81,7 @@ const EchoCreationScreen = () => {
       </div>
       {isRecording && (
         <div className="mb-4">
-          <Button variant="outline" size="lg" className="w-full" onClick={stopRecording}>
+          <Button type="button" variant="outline" size="lg" className="w-full" onClick={stopRecording}>
             <Square className="mr-2" />
             Stop Recording
           </Button>
@@ -110,11 +119,11 @@ const EchoCreationScreen = () => {
           />
         </div>
       )}
-      <Button className="w-full" onClick={saveEcho}>
+      <Button type="submit" className="w-full">
         <Save className="mr-2" />
         Share Echo
       </Button>
-    </div>
+    </form>
   );
 };
 
