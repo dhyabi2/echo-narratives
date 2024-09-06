@@ -1,21 +1,79 @@
 import { openDB } from 'idb';
 
-const dbPromise = openDB('echoes-db', 1, {
-  upgrade(db) {
-    db.createObjectStore('echoes', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('badges', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('follows', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('reactions', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('playlists', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('achievements', { keyPath: 'id', autoIncrement: true });
-    db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+const DB_NAME = 'echoes-db';
+const DB_VERSION = 2; // Increment the version to trigger an upgrade
+
+const dbPromise = openDB(DB_NAME, DB_VERSION, {
+  upgrade(db, oldVersion, newVersion, transaction) {
+    // Create object stores if they don't exist
+    if (!db.objectStoreNames.contains('echoes')) {
+      db.createObjectStore('echoes', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('categories')) {
+      db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('notifications')) {
+      db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('badges')) {
+      db.createObjectStore('badges', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('users')) {
+      db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('follows')) {
+      db.createObjectStore('follows', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('reactions')) {
+      db.createObjectStore('reactions', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('playlists')) {
+      db.createObjectStore('playlists', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('achievements')) {
+      db.createObjectStore('achievements', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('reports')) {
+      db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+    }
   },
 });
 
-// Existing functions...
+export async function getEchoes() {
+  return (await dbPromise).getAll('echoes');
+}
+
+export async function addEcho(echo) {
+  return (await dbPromise).add('echoes', echo);
+}
+
+export async function getCategories() {
+  return (await dbPromise).getAll('categories');
+}
+
+export async function addCategory(category) {
+  return (await dbPromise).add('categories', category);
+}
+
+export async function getNotifications() {
+  return (await dbPromise).getAll('notifications');
+}
+
+export async function addNotification(notification) {
+  return (await dbPromise).add('notifications', notification);
+}
+
+export async function clearNotifications() {
+  return (await dbPromise).clear('notifications');
+}
+
+export async function getBadges() {
+  return (await dbPromise).getAll('badges');
+}
+
+export async function addBadge(badge) {
+  return (await dbPromise).add('badges', badge);
+}
 
 export async function getUser(id) {
   return (await dbPromise).get('users', id);
@@ -83,7 +141,6 @@ export async function reportEcho(echoId, userId, reason) {
 }
 
 export async function getRecommendedEchoes(userId) {
-  // This is a simple recommendation system. In a real app, you'd use more sophisticated algorithms.
   const db = await dbPromise;
   const user = await db.get('users', userId);
   const allEchoes = await db.getAll('echoes');
