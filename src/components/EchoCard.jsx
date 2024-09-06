@@ -9,11 +9,19 @@ const EchoCard = ({ echo, onPlay }) => {
     // You might want to update the UI or refetch the echo here
   };
 
+  const handlePlay = () => {
+    if (onPlay && typeof onPlay === 'function') {
+      onPlay(echo);
+    } else {
+      console.log('Play functionality not implemented for this echo:', echo.title);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4">
       <h3 className="text-lg font-semibold mb-2">{echo.title}</h3>
       <div className="flex items-center justify-between mb-4">
-        <Button variant="outline" size="icon" onClick={() => onPlay(echo)}>
+        <Button variant="outline" size="icon" onClick={handlePlay}>
           <Play className="h-4 w-4" />
         </Button>
         <span className="text-sm text-gray-500">{echo.duration}</span>
