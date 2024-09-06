@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Play, Pause, SkipBack, SkipForward, Heart, Mic, Volume2, Music } from 'lucide-react';
 import { Button } from './ui/button';
 import { Slider } from './ui/slider';
@@ -11,25 +11,93 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(100);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const audioRef = useRef(null);
 
   useEffect(() => {
-    let interval;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setProgress((prevProgress) => {
-          if (prevProgress >= 100) {
-            clearInterval(interval);
-            setIsPlaying(false);
-            return 100;
-          }
-          return prevProgress + 1;
-        });
-      }, 1000 / playbackSpeed);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, playbackSpeed]);
+    const audio = audioRef.current;
 
-  const togglePlayPause = () => setIsPlaying(!isPlaying);
+    if (audio) {
+      // Web API: Media Session API
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: echo.title,
+          artist: echo.author || 'Anonymous',
+          album: 'Echoes App',
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+          audio.play();
+          setIsPlaying(true);
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+          audio.pause();
+          setIsPlaying(false);
+        });
+
+        navigator.mediaSession.setActionHandler('seekbackward', () => {
+          audio.currentTime = Math.max(audio.currentTime - 10, 0);
+        });
+
+        navigator.mediaSession.setActionHandler('seekforward', () => {
+          audio.currentTime = Math.min(audio.currentTime + 10, audio.duration);
+        });
+      }
+
+      // Web API: Web Audio API for visualizations
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaElementSource(audio);
+      const analyser = audioContext.createAnalyser();
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+
+      // Update progress
+      audio.addEventListener('timeupdate', () => {
+        setProgress((audio.currentTime / audio.duration) * 100);
+      });
+
+      // Playback ended
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+        setProgress(0);
+      });
+
+      return () => {
+        audio.removeEventListener('timeupdate', () => {});
+        audio.removeEventListener('ended', () => {});
+        audioContext.close();
+      };
+    }
+  }, [echo]);
+
+  const togglePlayPause = () => {
+    const audio = audioRef.current;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSeek = (value) => {
+    const audio = audioRef.current;
+    const seekTime = (value / 100) * audio.duration;
+    audio.currentTime = seekTime;
+    setProgress(value);
+  };
+
+  const handleVolumeChange = (value) => {
+    const audio = audioRef.current;
+    audio.volume = value / 100;
+    setVolume(value);
+  };
+
+  const handleSpeedChange = (speed) => {
+    const audio = audioRef.current;
+    audio.playbackRate = speed;
+    setPlaybackSpeed(speed);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -39,16 +107,17 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
         </Button>
         <h2 className="text-2xl font-bold mb-4">{echo.title}</h2>
         <p className="text-gray-500 mb-4">{echo.category}</p>
+        <audio ref={audioRef} src={echo.audioUrl} />
         <AudioWaveform progress={progress} />
-        <Slider value={[progress]} max={100} step={1} className="mb-4" />
+        <Slider value={[progress]} max={100} step={1} onValueChange={(value) => handleSeek(value[0])} className="mb-4" />
         <div className="flex justify-between items-center mb-4">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={() => handleSeek(Math.max(progress - 10, 0))}>
             <SkipBack className="h-6 w-6" />
           </Button>
           <Button variant="outline" size="icon" className="h-16 w-16" onClick={togglePlayPause}>
             {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={() => handleSeek(Math.min(progress + 10, 100))}>
             <SkipForward className="h-6 w-6" />
           </Button>
         </div>
@@ -58,7 +127,7 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
             value={[volume]}
             max={100}
             step={1}
-            onValueChange={(value) => setVolume(value[0])}
+            onValueChange={(value) => handleVolumeChange(value[0])}
             className="w-full"
           />
         </div>
@@ -66,7 +135,7 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
           <Music className="h-5 w-5 mr-2" />
           <select
             value={playbackSpeed}
-            onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
+            onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
             className="border rounded p-1"
           >
             <option value={0.5}>0.5x</option>

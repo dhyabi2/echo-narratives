@@ -18,10 +18,34 @@ const HomeScreen = () => {
   const [playingEcho, setPlayingEcho] = useState(null);
   const [echoes, setEchoes] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     setEchoes(getEchoes());
     setCategories(['All', ...getCategories()]);
+
+    // Web API: Network Information API
+    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // Web API: Page Visibility API
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        // Refresh data when page becomes visible
+        setEchoes(getEchoes());
+      }
+    });
+
+    // Web API: Web Share API
+    if (navigator.share) {
+      console.log('Web Share API is supported');
+    }
+
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
   }, []);
 
   const handlePlay = (echo) => {
@@ -46,10 +70,34 @@ const HomeScreen = () => {
     return b.likes + b.replies - (a.likes + a.replies);
   });
 
+  const handleShare = async (echo) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: echo.title,
+          text: `Check out this echo: ${echo.title}`,
+          url: `https://echoes.app/echo/${echo.id}`,
+        });
+        console.log('Echo shared successfully');
+      } catch (error) {
+        console.error('Error sharing echo:', error);
+      }
+    } else {
+      console.log('Web Share API not supported');
+      // Fallback sharing method
+    }
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Echo Feed</h1>
       
+      {!isOnline && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+          <p>You are currently offline. Some features may be limited.</p>
+        </div>
+      )}
+
       <CategoryFilter categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       <div className="flex justify-between items-center mb-4">
@@ -69,7 +117,7 @@ const HomeScreen = () => {
 
       <div className="space-y-4 mt-4">
         {sortedEchoes.map((echo) => (
-          <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} />
+          <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} onShare={() => handleShare(echo)} />
         ))}
       </div>
 
