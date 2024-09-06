@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { addEcho } from '../lib/db';
+import { useNavigate } from 'react-router-dom';
 
 const EchoCreationScreen = ({ onClose }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -14,6 +15,7 @@ const EchoCreationScreen = ({ onClose }) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const navigate = useNavigate();
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -38,7 +40,12 @@ const EchoCreationScreen = ({ onClose }) => {
       createdAt: new Date().toISOString(),
     };
     await addEcho(newEcho);
-    onClose();
+    if (typeof onClose === 'function') {
+      onClose();
+    } else {
+      // If onClose is not provided, navigate to the home page
+      navigate('/');
+    }
   };
 
   return (
