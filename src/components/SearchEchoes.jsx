@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useSearchEchoes } from '../hooks/useSearchEchoes';
-import EchoList from './EchoList';
+import EchoList from './EchoList.jsx';
 
 const SearchEchoes = () => {
   const [query, setQuery] = useState('');

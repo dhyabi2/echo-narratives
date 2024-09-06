@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { ArrowDownUp } from 'lucide-react';
-import EchoCard from './EchoCard';
-import EchoPlaybackOverlay from './EchoPlaybackOverlay';
+import EchoCard from './EchoCard.jsx';
+import EchoPlaybackOverlay from './EchoPlaybackOverlay.jsx';
 
 const categories = ['All', 'Confessions', 'Life Advice', 'Love Stories'];
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];

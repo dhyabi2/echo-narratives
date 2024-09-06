@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTrendingEchoes } from '../hooks/useTrendingEchoes';
-import EchoList from './EchoList';
+import EchoList from './EchoList.jsx';
 
 const TrendingEchoes = () => {
   const { echoes, isLoading, error } = useTrendingEchoes();

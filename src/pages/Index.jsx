@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import SplashScreen from '../components/SplashScreen';
-import HomeScreen from '../components/HomeScreen';
-import EchoRecorder from '../components/EchoRecorder';
-import TrendingEchoes from '../components/TrendingEchoes';
-import SearchEchoes from '../components/SearchEchoes';
-import DarkModeToggle from '../components/DarkModeToggle';
+import SplashScreen from '../components/SplashScreen.jsx';
+import HomeScreen from '../components/HomeScreen.jsx';
+import EchoRecorder from '../components/EchoRecorder.jsx';
+import TrendingEchoes from '../components/TrendingEchoes.jsx';
+import SearchEchoes from '../components/SearchEchoes.jsx';
+import DarkModeToggle from '../components/DarkModeToggle.jsx';
 
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);

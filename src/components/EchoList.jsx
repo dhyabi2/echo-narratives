@@ -1,5 +1,5 @@
 import React from 'react';
-import EchoCard from './EchoCard';
+import EchoCard from './EchoCard.jsx';
 
 const EchoList = ({ echoes, onEchoClick }) => {
   return (
