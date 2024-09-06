@@ -3,38 +3,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { ArrowDownUp, Mic, Search } from 'lucide-react';
 import EchoCard from './EchoCard';
-import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import TrendingTopics from './TrendingTopics';
 import CategoryFilter from './CategoryFilter';
 import SearchEchoes from './SearchEchoes';
 import RecommendedEchoes from './RecommendedEchoes';
-import { getEchoes, getCategories } from '../utils/localStorage';
+import { getEchoes, getCategories } from '../lib/db';
 import { Input } from './ui/input';
+import { useNavigate } from 'react-router-dom';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 
 const HomeScreen = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('Trending');
-  const [playingEcho, setPlayingEcho] = useState(null);
   const [echoes, setEchoes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setEchoes(getEchoes());
-    setCategories(['All', ...getCategories()]);
+    const fetchData = async () => {
+      const fetchedEchoes = await getEchoes();
+      const fetchedCategories = await getCategories();
+      setEchoes(fetchedEchoes);
+      setCategories(['All', ...fetchedCategories.map(cat => cat.name)]);
+    };
+    fetchData();
 
     const updateOnlineStatus = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        setEchoes(getEchoes());
-      }
-    });
 
     return () => {
       window.removeEventListener('online', updateOnlineStatus);
@@ -42,12 +41,8 @@ const HomeScreen = () => {
     };
   }, []);
 
-  const handlePlay = (echo) => {
-    setPlayingEcho(echo);
-  };
-
-  const handleClosePlayback = () => {
-    setPlayingEcho(null);
+  const handleEchoUpdated = (updatedEcho) => {
+    setEchoes(prevEchoes => prevEchoes.map(echo => echo.id === updatedEcho.id ? updatedEcho : echo));
   };
 
   const filteredEchoes = echoes.filter(echo => 
@@ -64,24 +59,6 @@ const HomeScreen = () => {
     }
     return b.likes + b.replies - (a.likes + a.replies);
   });
-
-  const handleShare = async (echo) => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: echo.title,
-          text: `Check out this echo: ${echo.title}`,
-          url: `https://echoes.app/echo/${echo.id}`,
-        });
-        console.log('Echo shared successfully');
-      } catch (error) {
-        console.error('Error sharing echo:', error);
-      }
-    } else {
-      console.log('Web Share API not supported');
-      // Fallback sharing method
-    }
-  };
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -120,17 +97,16 @@ const HomeScreen = () => {
 
       <div className="space-y-6 mt-6">
         {sortedEchoes.map((echo) => (
-          <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} onShare={() => handleShare(echo)} />
+          <EchoCard key={echo.id} echo={echo} onEchoUpdated={handleEchoUpdated} />
         ))}
       </div>
 
       <RecommendedEchoes />
 
-      {playingEcho && (
-        <EchoPlaybackOverlay echo={playingEcho} onClose={handleClosePlayback} />
-      )}
-
-      <Button className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg" onClick={() => console.log('Record new echo')}>
+      <Button 
+        className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg"
+        onClick={() => navigate('/record')}
+      >
         <Mic className="h-6 w-6" />
       </Button>
     </div>

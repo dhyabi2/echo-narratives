@@ -7,7 +7,7 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { addEcho, getCategories } from '../utils/localStorage';
+import { addEcho, getCategories } from '../lib/db';
 
 const EchoCreationScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -27,7 +27,12 @@ const EchoCreationScreen = () => {
   const timerRef = useRef(null);
 
   useEffect(() => {
-    setCategories(getCategories());
+    const fetchCategories = async () => {
+      const fetchedCategories = await getCategories();
+      setCategories(fetchedCategories);
+    };
+    fetchCategories();
+
     return () => {
       if (audioContextRef.current) {
         audioContextRef.current.close();
@@ -107,6 +112,14 @@ const EchoCreationScreen = () => {
       toast.error('Please record an echo before saving.');
       return;
     }
+    if (!title) {
+      toast.error('Please enter a title for your echo.');
+      return;
+    }
+    if (!category) {
+      toast.error('Please select a category for your echo.');
+      return;
+    }
     try {
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
@@ -115,12 +128,13 @@ const EchoCreationScreen = () => {
         const newEcho = await addEcho({
           title,
           category,
-          duration: recordingTime,
+          duration: formatTime(recordingTime),
           isAnonymous,
           audioData: base64AudioMessage,
           likes: 0,
           replies: 0,
-          shares: 0
+          shares: 0,
+          createdAt: new Date().toISOString(),
         });
         toast.success('Echo created successfully!');
         navigate('/');
@@ -132,9 +146,9 @@ const EchoCreationScreen = () => {
   };
 
   return (
-    <form onSubmit={saveEcho} className="p-4">
+    <form onSubmit={saveEcho} className="p-4 space-y-4">
       <h2 className="text-2xl font-bold mb-4">Create New Echo</h2>
-      <div className="mb-4">
+      <div>
         <Button
           type="button"
           variant={isRecording ? (isPaused ? 'outline' : 'destructive') : 'default'}
@@ -147,7 +161,7 @@ const EchoCreationScreen = () => {
         </Button>
       </div>
       {isRecording && (
-        <div className="mb-4">
+        <div>
           <p className="text-center font-semibold">{formatTime(recordingTime)}</p>
           <Button type="button" variant="outline" size="lg" className="w-full mt-2" onClick={stopRecording}>
             <Square className="mr-2" />
@@ -156,15 +170,15 @@ const EchoCreationScreen = () => {
         </div>
       )}
       {audioUrl && (
-        <div className="mb-4">
+        <div>
           <audio src={audioUrl} controls className="w-full" />
         </div>
       )}
-      <div className="mb-4">
+      <div>
         <Label htmlFor="echo-title">Echo Title</Label>
         <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter a title for your echo" />
       </div>
-      <div className="mb-4">
+      <div>
         <Label htmlFor="echo-category">Category</Label>
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger id="echo-category">
@@ -172,16 +186,16 @@ const EchoCreationScreen = () => {
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between">
         <Label htmlFor="anonymous-toggle">Post Anonymously</Label>
         <Switch id="anonymous-toggle" checked={isAnonymous} onCheckedChange={setIsAnonymous} />
       </div>
-      <Button type="submit" className="w-full" disabled={!audioBlob}>
+      <Button type="submit" className="w-full" disabled={!audioBlob || !title || !category}>
         <Save className="mr-2" />
         Share Echo
       </Button>
