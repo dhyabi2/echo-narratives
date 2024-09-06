@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { ArrowDownUp } from 'lucide-react';
 import EchoCard from './EchoCard';
-import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import TrendingTopics from './TrendingTopics';
 import CategoryFilter from './CategoryFilter';
 import SearchEchoes from './SearchEchoes';
@@ -14,7 +13,6 @@ const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 const HomeScreen = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('Trending');
-  const [playingEcho, setPlayingEcho] = useState(null);
   const [echoes, setEchoes] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -28,14 +26,6 @@ const HomeScreen = () => {
     ]);
     setCategories(['All', 'Advice', 'Confession', 'Love', 'Travel', 'Music']);
   }, []);
-
-  const handlePlay = (echo) => {
-    setPlayingEcho(echo);
-  };
-
-  const handleClosePlayback = () => {
-    setPlayingEcho(null);
-  };
 
   return (
     <div className="p-4">
@@ -60,15 +50,11 @@ const HomeScreen = () => {
 
       <div className="space-y-4 mt-4">
         {echoes.map((echo) => (
-          <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} />
+          <EchoCard key={echo.id} echo={echo} />
         ))}
       </div>
 
       <RecommendedEchoes />
-
-      {playingEcho && (
-        <EchoPlaybackOverlay echo={playingEcho} onClose={handleClosePlayback} />
-      )}
     </div>
   );
 };

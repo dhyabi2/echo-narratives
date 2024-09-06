@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Play, Heart, Share2, Flag, Bookmark, Hash } from 'lucide-react';
 import { Button } from './ui/button';
 import EchoReactions from './EchoReactions';
 import EchoMetadata from './EchoMetadata';
 import EchoTags from './EchoTags';
+import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 
-const EchoCard = ({ echo, onPlay }) => {
+const EchoCard = ({ echo }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlay = () => {
+    setIsPlaying(true);
+  };
+
   const handleShare = () => {
     // Implement sharing functionality
     console.log('Sharing echo:', echo.id);
@@ -26,7 +33,7 @@ const EchoCard = ({ echo, onPlay }) => {
       <h3 className="text-lg font-semibold mb-2">{echo.title}</h3>
       <EchoMetadata duration={echo.duration} category={echo.category} createdAt={echo.createdAt} />
       <div className="flex items-center justify-between mb-4">
-        <Button variant="outline" size="icon" onClick={() => onPlay(echo)}>
+        <Button variant="outline" size="icon" onClick={handlePlay}>
           <Play className="h-4 w-4" />
         </Button>
         <EchoReactions echo={echo} />
@@ -46,6 +53,9 @@ const EchoCard = ({ echo, onPlay }) => {
           Bookmark
         </Button>
       </div>
+      {isPlaying && (
+        <EchoPlaybackOverlay echo={echo} onClose={() => setIsPlaying(false)} />
+      )}
     </div>
   );
 };
