@@ -1,39 +1,32 @@
 import React, { useState } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { searchEchoes } from '../lib/db';
+import { useSearchEchoes } from '../hooks/useSearchEchoes';
 import EchoList from './EchoList';
 
 const SearchEchoes = () => {
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('');
-  const [results, setResults] = useState([]);
+  const { search, results, isLoading, error } = useSearchEchoes();
 
-  const handleSearch = async () => {
-    const searchResults = await searchEchoes(query, { category });
-    setResults(searchResults);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    search(query);
   };
 
   return (
     <div className="space-y-4">
-      <Input
-        type="text"
-        placeholder="Search echoes..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <Select value={category} onValueChange={setCategory}>
-        <SelectTrigger>
-          <SelectValue placeholder="Select a category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">All Categories</SelectItem>
-          {/* Add more categories here */}
-        </SelectContent>
-      </Select>
-      <Button onClick={handleSearch}>Search</Button>
-      <EchoList echoes={results} />
+      <form onSubmit={handleSearch} className="flex space-x-2">
+        <Input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search echoes..."
+        />
+        <Button type="submit">Search</Button>
+      </form>
+      {isLoading && <div>Searching...</div>}
+      {error && <div>Error: {error.message}</div>}
+      {results && <EchoList echoes={results} />}
     </div>
   );
 };

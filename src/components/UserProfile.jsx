@@ -1,26 +1,33 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
-import EchoStats from './EchoStats';
+import { useAuth } from '../contexts/AuthContext';
+import { useUser } from '../hooks/useUser';
 
-const UserProfile = ({ user }) => {
+const UserProfile = () => {
+  const { user } = useAuth();
+  const { userData, isLoading, error } = useUser(user.uid);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center space-x-4 mb-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={user.avatar} alt={user.name} />
-          <AvatarFallback>{user.name[0]}</AvatarFallback>
-        </Avatar>
+    <div className="space-y-4">
+      <Avatar className="w-24 h-24">
+        <AvatarImage src={userData.avatarUrl} alt={userData.username} />
+        <AvatarFallback>{userData.username[0]}</AvatarFallback>
+      </Avatar>
+      <h2 className="text-2xl font-bold">{userData.username}</h2>
+      <p>{userData.bio}</p>
+      <div className="flex space-x-4">
         <div>
-          <h2 className="text-2xl font-bold">{user.name}</h2>
-          <p className="text-gray-500">@{user.username}</p>
+          <strong>{userData.followers.length}</strong> Followers
+        </div>
+        <div>
+          <strong>{userData.following.length}</strong> Following
         </div>
       </div>
-      <p className="mb-4">{user.bio}</p>
-      <EchoStats likes={user.totalLikes} replies={user.totalReplies} shares={user.totalShares} />
-      <div className="mt-4">
-        <Button variant="outline" className="w-full">Edit Profile</Button>
-      </div>
+      <Button>Edit Profile</Button>
     </div>
   );
 };
