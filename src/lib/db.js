@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -25,6 +25,9 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
     }
     if (!db.objectStoreNames.contains('notifications')) {
       db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains('badges')) {
+      db.createObjectStore('badges', { keyPath: 'id', autoIncrement: true });
     }
   },
 });
@@ -152,11 +155,23 @@ export async function clearNotifications() {
   await store.clear();
 }
 
+export async function getBadges() {
+  return (await dbPromise).getAll('badges');
+}
+
+export async function addBadge(badge) {
+  return (await dbPromise).add('badges', {
+    ...badge,
+    createdAt: new Date().toISOString(),
+  });
+}
+
 // Initialize with some sample data
 (async () => {
   const db = await dbPromise;
   const echoes = await db.getAll('echoes');
   const categories = await db.getAll('categories');
+  const badges = await db.getAll('badges');
 
   if (echoes.length === 0) {
     await addEcho({
@@ -172,6 +187,17 @@ export async function clearNotifications() {
     const sampleCategories = ['General', 'Music', 'News', 'Technology', 'Sports'];
     for (const category of sampleCategories) {
       await addCategory({ name: category });
+    }
+  }
+
+  if (badges.length === 0) {
+    const sampleBadges = [
+      { name: 'Newcomer', description: 'Welcome to Echoes!', icon: '🎉' },
+      { name: 'Frequent Poster', description: 'Posted 10 echoes', icon: '🏆' },
+      { name: 'Popular Voice', description: 'Received 100 likes', icon: '🌟' },
+    ];
+    for (const badge of sampleBadges) {
+      await addBadge(badge);
     }
   }
 })();
