@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, Pause, Stop, Play, Save } from 'lucide-react';
+import { Mic, Pause, Square, Play, Save } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -58,7 +58,7 @@ const EchoCreationScreen = ({ onClose }) => {
       {isRecording && (
         <div className="mb-4">
           <Button variant="outline" size="lg" className="w-full" onClick={stopRecording}>
-            <Stop className="mr-2" />
+            <Square className="mr-2" />
             Stop Recording
           </Button>
         </div>
