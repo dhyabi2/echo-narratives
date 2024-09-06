@@ -1,37 +1,24 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 2; // Increment the version to trigger an upgrade
+const DB_VERSION = 3;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
-    // Create object stores if they don't exist
     if (!db.objectStoreNames.contains('echoes')) {
       db.createObjectStore('echoes', { keyPath: 'id', autoIncrement: true });
     }
     if (!db.objectStoreNames.contains('categories')) {
       db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
     }
-    if (!db.objectStoreNames.contains('notifications')) {
-      db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true });
+    if (!db.objectStoreNames.contains('comments')) {
+      db.createObjectStore('comments', { keyPath: 'id', autoIncrement: true });
     }
-    if (!db.objectStoreNames.contains('badges')) {
-      db.createObjectStore('badges', { keyPath: 'id', autoIncrement: true });
+    if (!db.objectStoreNames.contains('tags')) {
+      db.createObjectStore('tags', { keyPath: 'id', autoIncrement: true });
     }
-    if (!db.objectStoreNames.contains('users')) {
-      db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
-    }
-    if (!db.objectStoreNames.contains('follows')) {
-      db.createObjectStore('follows', { keyPath: 'id', autoIncrement: true });
-    }
-    if (!db.objectStoreNames.contains('reactions')) {
-      db.createObjectStore('reactions', { keyPath: 'id', autoIncrement: true });
-    }
-    if (!db.objectStoreNames.contains('playlists')) {
-      db.createObjectStore('playlists', { keyPath: 'id', autoIncrement: true });
-    }
-    if (!db.objectStoreNames.contains('achievements')) {
-      db.createObjectStore('achievements', { keyPath: 'id', autoIncrement: true });
+    if (!db.objectStoreNames.contains('bookmarks')) {
+      db.createObjectStore('bookmarks', { keyPath: 'id', autoIncrement: true });
     }
     if (!db.objectStoreNames.contains('reports')) {
       db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
@@ -44,7 +31,21 @@ export async function getEchoes() {
 }
 
 export async function addEcho(echo) {
-  return (await dbPromise).add('echoes', echo);
+  return (await dbPromise).add('echoes', { ...echo, createdAt: new Date().toISOString() });
+}
+
+export async function getEchoById(id) {
+  return (await dbPromise).get('echoes', id);
+}
+
+export async function updateEchoLikes(id, likes) {
+  const db = await dbPromise;
+  const tx = db.transaction('echoes', 'readwrite');
+  const store = tx.objectStore('echoes');
+  const echo = await store.get(id);
+  echo.likes = likes;
+  await store.put(echo);
+  return echo;
 }
 
 export async function getCategories() {
@@ -55,94 +56,101 @@ export async function addCategory(category) {
   return (await dbPromise).add('categories', category);
 }
 
-export async function getNotifications() {
-  return (await dbPromise).getAll('notifications');
-}
-
-export async function addNotification(notification) {
-  return (await dbPromise).add('notifications', notification);
-}
-
-export async function clearNotifications() {
-  return (await dbPromise).clear('notifications');
-}
-
-export async function getBadges() {
-  return (await dbPromise).getAll('badges');
-}
-
-export async function addBadge(badge) {
-  return (await dbPromise).add('badges', badge);
-}
-
-export async function getUser(id) {
-  return (await dbPromise).get('users', id);
-}
-
-export async function addUser(user) {
-  return (await dbPromise).add('users', user);
-}
-
-export async function updateUser(user) {
-  return (await dbPromise).put('users', user);
-}
-
-export async function followUser(followerId, followedId) {
-  return (await dbPromise).add('follows', { followerId, followedId });
-}
-
-export async function unfollowUser(followerId, followedId) {
+export async function getComments(echoId) {
   const db = await dbPromise;
-  const follow = await db.getAll('follows', IDBKeyRange.only([followerId, followedId]));
-  if (follow.length > 0) {
-    return db.delete('follows', follow[0].id);
-  }
+  const tx = db.transaction('comments', 'readonly');
+  const store = tx.objectStore('comments');
+  return store.getAll(IDBKeyRange.only(echoId));
 }
 
-export async function addReaction(echoId, userId, reactionType) {
-  return (await dbPromise).add('reactions', { echoId, userId, reactionType });
-}
-
-export async function removeReaction(reactionId) {
-  return (await dbPromise).delete('reactions', reactionId);
-}
-
-export async function createPlaylist(playlist) {
-  return (await dbPromise).add('playlists', playlist);
-}
-
-export async function getPlaylist(id) {
-  return (await dbPromise).get('playlists', id);
-}
-
-export async function addEchoToPlaylist(playlistId, echoId) {
-  const playlist = await getPlaylist(playlistId);
-  playlist.echoes.push(echoId);
-  return (await dbPromise).put('playlists', playlist);
-}
-
-export async function searchEchoes(query, filters) {
-  const db = await dbPromise;
-  const allEchoes = await db.getAll('echoes');
-  return allEchoes.filter(echo => {
-    const matchesQuery = echo.title.toLowerCase().includes(query.toLowerCase()) ||
-                         echo.transcription.toLowerCase().includes(query.toLowerCase());
-    const matchesFilters = Object.entries(filters).every(([key, value]) => echo[key] === value);
-    return matchesQuery && matchesFilters;
+export async function addComment(echoId, content) {
+  return (await dbPromise).add('comments', {
+    echoId,
+    content,
+    createdAt: new Date().toISOString(),
   });
 }
 
-export async function addAchievement(userId, achievementType) {
-  return (await dbPromise).add('achievements', { userId, achievementType, date: new Date() });
+export async function getTags() {
+  return (await dbPromise).getAll('tags');
 }
 
-export async function reportEcho(echoId, userId, reason) {
-  return (await dbPromise).add('reports', { echoId, userId, reason, date: new Date() });
+export async function addTag(tag) {
+  return (await dbPromise).add('tags', tag);
 }
 
-export async function getRecommendedEchoes(userId) {
+export async function reportEcho(echoId, reason) {
+  return (await dbPromise).add('reports', {
+    echoId,
+    reason,
+    createdAt: new Date().toISOString(),
+  });
+}
+
+export async function getEchoTranscript(echoId) {
+  const echo = await getEchoById(echoId);
+  return echo.transcript || 'Transcript not available';
+}
+
+export async function getRelatedEchoes(echoId) {
+  const echo = await getEchoById(echoId);
+  const allEchoes = await getEchoes();
+  return allEchoes
+    .filter(e => e.id !== echoId && e.category === echo.category)
+    .slice(0, 5);
+}
+
+export async function isEchoBookmarked(echoId) {
   const db = await dbPromise;
-  const user = await db.get('users', userId);
-  const allEchoes = await db.getAll('echoes');
-  return allEchoes.filter(echo => echo.category === user.preferredCategory).slice(0, 10);
+  const bookmark = await db.get('bookmarks', echoId);
+  return !!bookmark;
 }
+
+export async function toggleEchoBookmark(echoId) {
+  const db = await dbPromise;
+  const tx = db.transaction('bookmarks', 'readwrite');
+  const store = tx.objectStore('bookmarks');
+  
+  const existingBookmark = await store.get(echoId);
+  if (existingBookmark) {
+    await store.delete(echoId);
+    return false;
+  } else {
+    await store.add({ id: echoId, createdAt: new Date().toISOString() });
+    return true;
+  }
+}
+
+export async function addEchoReply(echoId, content) {
+  const reply = {
+    echoId,
+    content,
+    createdAt: new Date().toISOString(),
+  };
+  const id = await (await dbPromise).add('comments', reply);
+  return { ...reply, id };
+}
+
+// Initialize with some sample data
+(async () => {
+  const db = await dbPromise;
+  const echoes = await db.getAll('echoes');
+  const categories = await db.getAll('categories');
+
+  if (echoes.length === 0) {
+    await addEcho({
+      title: 'Welcome to Echoes',
+      content: 'This is your first echo!',
+      category: 'General',
+      likes: 0,
+      shares: 0,
+    });
+  }
+
+  if (categories.length === 0) {
+    const sampleCategories = ['General', 'Music', 'News', 'Technology', 'Sports'];
+    for (const category of sampleCategories) {
+      await addCategory({ name: category });
+    }
+  }
+})();
