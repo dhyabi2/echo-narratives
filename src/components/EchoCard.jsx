@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
-import { Play, Heart, Share2, Flag, Bookmark, Hash } from 'lucide-react';
+import { Play, Heart, Share2, Flag, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import EchoReactions from './EchoReactions';
 import EchoMetadata from './EchoMetadata';
 import EchoTags from './EchoTags';
 import EchoPlaybackOverlay from './EchoPlaybackOverlay';
+import ShareEchoModal from './ShareEchoModal';
 
 const EchoCard = ({ echo }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handlePlay = () => {
     setIsPlaying(true);
   };
 
-  const handleShare = () => {
-    // Implement sharing functionality
-    console.log('Sharing echo:', echo.id);
+  const handleShare = (e) => {
+    e.preventDefault();
+    setIsShareModalOpen(true);
   };
 
   const handleReport = () => {
@@ -56,6 +58,11 @@ const EchoCard = ({ echo }) => {
       {isPlaying && (
         <EchoPlaybackOverlay echo={echo} onClose={() => setIsPlaying(false)} />
       )}
+      <ShareEchoModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        echo={echo}
+      />
     </div>
   );
 };
