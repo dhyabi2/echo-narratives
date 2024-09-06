@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { ArrowDownUp } from 'lucide-react';
 import EchoCard from './EchoCard';
+import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 
 const categories = ['All', 'Confessions', 'Life Advice', 'Love Stories'];
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
@@ -16,6 +17,15 @@ const mockEchoes = [
 const HomeScreen = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('Trending');
+  const [playingEcho, setPlayingEcho] = useState(null);
+
+  const handlePlay = (echo) => {
+    setPlayingEcho(echo);
+  };
+
+  const handleClosePlayback = () => {
+    setPlayingEcho(null);
+  };
 
   return (
     <div className="p-4">
@@ -48,9 +58,13 @@ const HomeScreen = () => {
 
       <div className="space-y-4">
         {mockEchoes.map((echo) => (
-          <EchoCard key={echo.id} echo={echo} />
+          <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} />
         ))}
       </div>
+
+      {playingEcho && (
+        <EchoPlaybackOverlay echo={playingEcho} onClose={handleClosePlayback} />
+      )}
     </div>
   );
 };
