@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mic, Pause, Square, Play, Save } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -18,30 +18,84 @@ const EchoCreationScreen = () => {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [categories, setCategories] = useState([]);
   const [transcription, setTranscription] = useState('');
+  const [audioBlob, setAudioBlob] = useState(null);
   const navigate = useNavigate();
+
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const timerRef = useRef(null);
 
   useEffect(() => {
     setCategories(getCategories());
   }, []);
 
-  const toggleRecording = () => {
-    if (isRecording) {
-      setIsPaused(!isPaused);
-    } else {
+  const requestMicrophonePermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(audioBlob);
+        audioChunksRef.current = [];
+      };
+      return true;
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      toast.error('Unable to access microphone. Please check your browser settings.');
+      return false;
+    }
+  };
+
+  const toggleRecording = async () => {
+    if (!isRecording) {
+      const hasPermission = await requestMicrophonePermission();
+      if (!hasPermission) return;
+
+      mediaRecorderRef.current.start();
       setIsRecording(true);
       setIsPaused(false);
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else {
+      if (isPaused) {
+        mediaRecorderRef.current.resume();
+        setIsPaused(false);
+        timerRef.current = setInterval(() => {
+          setRecordingTime((prevTime) => prevTime + 1);
+        }, 1000);
+      } else {
+        mediaRecorderRef.current.pause();
+        setIsPaused(true);
+        clearInterval(timerRef.current);
+      }
     }
   };
 
   const stopRecording = () => {
+    mediaRecorderRef.current.stop();
     setIsRecording(false);
     setIsPaused(false);
+    clearInterval(timerRef.current);
     // Simulate transcription
     setTranscription("This is a simulated transcription of the recorded echo.");
   };
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   const saveEcho = (e) => {
     e.preventDefault();
+    if (!audioBlob) {
+      toast.error('Please record an echo before saving.');
+      return;
+    }
     try {
       const newEcho = addEcho({
         title,
@@ -49,6 +103,7 @@ const EchoCreationScreen = () => {
         duration: recordingTime,
         isAnonymous,
         transcription,
+        audioBlob,
         likes: 0,
         replies: 0,
         shares: 0
@@ -78,7 +133,8 @@ const EchoCreationScreen = () => {
       </div>
       {isRecording && (
         <div className="mb-4">
-          <Button type="button" variant="outline" size="lg" className="w-full" onClick={stopRecording}>
+          <p className="text-center font-semibold">{formatTime(recordingTime)}</p>
+          <Button type="button" variant="outline" size="lg" className="w-full mt-2" onClick={stopRecording}>
             <Square className="mr-2" />
             Stop Recording
           </Button>
@@ -116,7 +172,7 @@ const EchoCreationScreen = () => {
           />
         </div>
       )}
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" disabled={!audioBlob}>
         <Save className="mr-2" />
         Share Echo
       </Button>
