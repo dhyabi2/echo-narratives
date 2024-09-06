@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
-import { ArrowDownUp } from 'lucide-react';
+import { ArrowDownUp, Mic, Search } from 'lucide-react';
 import EchoCard from './EchoCard';
 import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import TrendingTopics from './TrendingTopics';
@@ -9,6 +9,7 @@ import CategoryFilter from './CategoryFilter';
 import SearchEchoes from './SearchEchoes';
 import RecommendedEchoes from './RecommendedEchoes';
 import { getEchoes, getCategories } from '../utils/localStorage';
+import { Input } from './ui/input';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 
@@ -19,28 +20,21 @@ const HomeScreen = () => {
   const [echoes, setEchoes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     setEchoes(getEchoes());
     setCategories(['All', ...getCategories()]);
 
-    // Web API: Network Information API
     const updateOnlineStatus = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 
-    // Web API: Page Visibility API
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
-        // Refresh data when page becomes visible
         setEchoes(getEchoes());
       }
     });
-
-    // Web API: Web Share API
-    if (navigator.share) {
-      console.log('Web Share API is supported');
-    }
 
     return () => {
       window.removeEventListener('online', updateOnlineStatus);
@@ -57,7 +51,9 @@ const HomeScreen = () => {
   };
 
   const filteredEchoes = echoes.filter(echo => 
-    activeCategory === 'All' || echo.category === activeCategory
+    (activeCategory === 'All' || echo.category === activeCategory) &&
+    (echo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     echo.content.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const sortedEchoes = [...filteredEchoes].sort((a, b) => {
@@ -66,7 +62,6 @@ const HomeScreen = () => {
     } else if (sortBy === 'Most Liked') {
       return b.likes - a.likes;
     }
-    // For 'Trending', we could implement a more complex algorithm
     return b.likes + b.replies - (a.likes + a.replies);
   });
 
@@ -89,19 +84,29 @@ const HomeScreen = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Echo Feed</h1>
+    <div className="p-4 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Echo Feed</h1>
       
       {!isOnline && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
           <p>You are currently offline. Some features may be limited.</p>
         </div>
       )}
 
+      <div className="mb-6">
+        <Input
+          type="text"
+          placeholder="Search echoes..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
+        />
+      </div>
+
       <CategoryFilter categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Today's Top Echoes</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Today's Top Echoes</h2>
         <Button variant="outline" size="sm" onClick={() => {
           const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
           setSortBy(sortOptions[nextIndex]);
@@ -113,9 +118,7 @@ const HomeScreen = () => {
 
       <TrendingTopics />
 
-      <SearchEchoes />
-
-      <div className="space-y-4 mt-4">
+      <div className="space-y-6 mt-6">
         {sortedEchoes.map((echo) => (
           <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} onShare={() => handleShare(echo)} />
         ))}
@@ -126,6 +129,10 @@ const HomeScreen = () => {
       {playingEcho && (
         <EchoPlaybackOverlay echo={playingEcho} onClose={handleClosePlayback} />
       )}
+
+      <Button className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg" onClick={() => console.log('Record new echo')}>
+        <Mic className="h-6 w-6" />
+      </Button>
     </div>
   );
 };

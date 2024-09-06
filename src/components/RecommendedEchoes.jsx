@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import EchoCard from './EchoCard';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 const RecommendedEchoes = () => {
   const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     // Fetch recommended echoes
-    // This is a placeholder for actual API calls
     setRecommendations([
-      { id: 6, title: 'Recommended Echo 1', duration: '2:00', likes: 150, category: 'Recommended' },
-      { id: 7, title: 'Recommended Echo 2', duration: '1:30', likes: 120, category: 'Recommended' },
+      { id: 6, title: 'Mindfulness Meditation Techniques', duration: '5:00', likes: 250, category: 'Wellness', author: 'ZenMaster', content: 'Discover simple mindfulness techniques to reduce stress and improve focus.' },
+      { id: 7, title: 'The Future of AI in Healthcare', duration: '7:30', likes: 180, category: 'Technology', author: 'TechGuru', content: 'Exploring how artificial intelligence is revolutionizing medical diagnoses and treatment plans.' },
     ]);
   }, []);
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">Recommended for You</h2>
-      <div className="space-y-4">
+    <Card className="mt-8">
+      <CardHeader>
+        <CardTitle>Recommended for You</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {recommendations.map((echo) => (
           <EchoCard key={echo.id} echo={echo} />
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
