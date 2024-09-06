@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import SplashScreen from '../components/SplashScreen';
-import AuthForm from '../components/AuthForm';
 import HomeScreen from '../components/HomeScreen';
 import EchoRecorder from '../components/EchoRecorder';
 import TrendingEchoes from '../components/TrendingEchoes';
 import SearchEchoes from '../components/SearchEchoes';
-import UserProfile from '../components/UserProfile';
 import DarkModeToggle from '../components/DarkModeToggle';
 
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -23,14 +19,6 @@ const Index = () => {
 
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  }
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <AuthForm />;
   }
 
   return (
@@ -47,7 +35,6 @@ const Index = () => {
           <EchoRecorder />
           <TrendingEchoes />
           <SearchEchoes />
-          <UserProfile />
         </div>
       </main>
     </div>

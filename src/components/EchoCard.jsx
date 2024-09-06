@@ -5,7 +5,7 @@ import { addReaction } from '../lib/db';
 
 const EchoCard = ({ echo, onPlay }) => {
   const handleReaction = async (reactionType) => {
-    await addReaction(echo.id, 'currentUserId', reactionType);
+    await addReaction(echo.id, reactionType);
     // You might want to update the UI or refetch the echo here
   };
 

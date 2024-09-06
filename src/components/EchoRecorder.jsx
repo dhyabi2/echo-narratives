@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Button } from './ui/button';
 import { Mic, Square, Play } from 'lucide-react';
+import { addEcho } from '../lib/db';
 
-const EchoRecorder = ({ onRecordingComplete }) => {
+const EchoRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const mediaRecorderRef = useRef(null);
@@ -25,9 +26,17 @@ const EchoRecorder = ({ onRecordingComplete }) => {
     setIsRecording(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (audioBlob) {
-      onRecordingComplete(audioBlob);
+      const echo = {
+        title: 'New Echo', // You might want to add a title input field
+        audioUrl: URL.createObjectURL(audioBlob),
+        duration: '0:30', // You should calculate the actual duration
+        likes: 0,
+        createdAt: new Date().toISOString(),
+      };
+      await addEcho(echo);
+      setAudioBlob(null);
     }
   };
 
