@@ -5,9 +5,9 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { addEcho, getCategories } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { addEcho, getCategories } from '../utils/localStorage';
 
 const EchoCreationScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -21,11 +21,7 @@ const EchoCreationScreen = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const fetchedCategories = await getCategories();
-      setCategories(fetchedCategories);
-    };
-    fetchCategories();
+    setCategories(getCategories());
   }, []);
 
   const toggleRecording = () => {
@@ -44,20 +40,21 @@ const EchoCreationScreen = () => {
     setTranscription("This is a simulated transcription of the recorded echo.");
   };
 
-  const saveEcho = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+  const saveEcho = (e) => {
+    e.preventDefault();
     try {
-      const newEcho = {
+      const newEcho = addEcho({
         title,
         category,
         duration: recordingTime,
         isAnonymous,
         transcription,
-        createdAt: new Date().toISOString(),
-      };
-      await addEcho(newEcho);
+        likes: 0,
+        replies: 0,
+        shares: 0
+      });
       toast.success('Echo created successfully!');
-      navigate('/'); // Navigate to home page after successful creation
+      navigate('/');
     } catch (error) {
       console.error('Error creating echo:', error);
       toast.error('Failed to create echo. Please try again.');
@@ -99,7 +96,7 @@ const EchoCreationScreen = () => {
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
             ))}
           </SelectContent>
         </Select>

@@ -8,6 +8,7 @@ import TrendingTopics from './TrendingTopics';
 import CategoryFilter from './CategoryFilter';
 import SearchEchoes from './SearchEchoes';
 import RecommendedEchoes from './RecommendedEchoes';
+import { getEchoes, getCategories } from '../utils/localStorage';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 
@@ -19,14 +20,8 @@ const HomeScreen = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    // Fetch echoes and categories from the API
-    // This is a placeholder for actual API calls
-    setEchoes([
-      { id: 1, title: 'Best Advice I Ever Received', duration: '1:30', likes: 120, category: 'Advice' },
-      { id: 2, title: 'My Biggest Confession', duration: '2:15', likes: 85, category: 'Confession' },
-      { id: 3, title: 'A Love Story to Remember', duration: '3:00', likes: 200, category: 'Love' },
-    ]);
-    setCategories(['All', 'Advice', 'Confession', 'Love', 'Travel', 'Music']);
+    setEchoes(getEchoes());
+    setCategories(['All', ...getCategories()]);
   }, []);
 
   const handlePlay = (echo) => {
@@ -36,6 +31,20 @@ const HomeScreen = () => {
   const handleClosePlayback = () => {
     setPlayingEcho(null);
   };
+
+  const filteredEchoes = echoes.filter(echo => 
+    activeCategory === 'All' || echo.category === activeCategory
+  );
+
+  const sortedEchoes = [...filteredEchoes].sort((a, b) => {
+    if (sortBy === 'Newest') {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    } else if (sortBy === 'Most Liked') {
+      return b.likes - a.likes;
+    }
+    // For 'Trending', we could implement a more complex algorithm
+    return b.likes + b.replies - (a.likes + a.replies);
+  });
 
   return (
     <div className="p-4">
@@ -59,7 +68,7 @@ const HomeScreen = () => {
       <SearchEchoes />
 
       <div className="space-y-4 mt-4">
-        {echoes.map((echo) => (
+        {sortedEchoes.map((echo) => (
           <EchoCard key={echo.id} echo={echo} onPlay={handlePlay} />
         ))}
       </div>

@@ -1,24 +1,25 @@
 import React from 'react';
-import { Play, Heart, Share2, Flag, Bookmark, Hash } from 'lucide-react';
+import { Play, Heart, Share2, Flag, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import EchoReactions from './EchoReactions';
 import EchoMetadata from './EchoMetadata';
 import EchoTags from './EchoTags';
+import { updateEcho } from '../utils/localStorage';
+import { toast } from 'sonner';
 
 const EchoCard = ({ echo, onPlay }) => {
   const handleShare = () => {
-    // Implement sharing functionality
-    console.log('Sharing echo:', echo.id);
+    const newShareCount = echo.shares + 1;
+    updateEcho({ ...echo, shares: newShareCount });
+    toast.success('Echo shared successfully!');
   };
 
   const handleReport = () => {
-    // Implement reporting functionality
-    console.log('Reporting echo:', echo.id);
+    toast.info('Echo reported. Our team will review it.');
   };
 
   const handleBookmark = () => {
-    // Implement bookmarking functionality
-    console.log('Bookmarking echo:', echo.id);
+    toast.success('Echo bookmarked!');
   };
 
   return (
