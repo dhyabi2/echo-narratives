@@ -1,21 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mic, Pause, Square, Play, Save } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { addEcho } from '../lib/db';
+import { addEcho, getCategories } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
 
-const EchoCreationScreen = ({ onClose }) => {
+const EchoCreationScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [transcription, setTranscription] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const fetchedCategories = await getCategories();
+      setCategories(fetchedCategories);
+    };
+    fetchCategories();
+  }, []);
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -29,6 +39,8 @@ const EchoCreationScreen = ({ onClose }) => {
   const stopRecording = () => {
     setIsRecording(false);
     setIsPaused(false);
+    // Simulate transcription
+    setTranscription("This is a simulated transcription of the recorded echo.");
   };
 
   const saveEcho = async () => {
@@ -37,15 +49,11 @@ const EchoCreationScreen = ({ onClose }) => {
       category,
       duration: recordingTime,
       isAnonymous,
+      transcription,
       createdAt: new Date().toISOString(),
     };
     await addEcho(newEcho);
-    if (typeof onClose === 'function') {
-      onClose();
-    } else {
-      // If onClose is not provided, navigate to the home page
-      navigate('/');
-    }
+    navigate('/');
   };
 
   return (
@@ -81,9 +89,9 @@ const EchoCreationScreen = ({ onClose }) => {
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="confession">Confession</SelectItem>
-            <SelectItem value="advice">Advice</SelectItem>
-            <SelectItem value="story">Story</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -91,6 +99,17 @@ const EchoCreationScreen = ({ onClose }) => {
         <Label htmlFor="anonymous-toggle">Post Anonymously</Label>
         <Switch id="anonymous-toggle" checked={isAnonymous} onCheckedChange={setIsAnonymous} />
       </div>
+      {transcription && (
+        <div className="mb-4">
+          <Label htmlFor="transcription">Transcription</Label>
+          <textarea
+            id="transcription"
+            value={transcription}
+            onChange={(e) => setTranscription(e.target.value)}
+            className="w-full h-32 p-2 border rounded"
+          />
+        </div>
+      )}
       <Button className="w-full" onClick={saveEcho}>
         <Save className="mr-2" />
         Share Echo
