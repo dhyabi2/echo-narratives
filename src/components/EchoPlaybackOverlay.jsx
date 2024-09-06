@@ -5,8 +5,10 @@ import { Slider } from './ui/slider';
 import AudioWaveform from './AudioWaveform';
 import EchoComments from './EchoComments';
 import RelatedEchoes from './RelatedEchoes';
+import { getEchoById, updateEcho } from '../utils/localStorage';
 
-const EchoPlaybackOverlay = ({ echo, onClose }) => {
+const EchoPlaybackOverlay = ({ echoId, onClose }) => {
+  const [echo, setEcho] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(100);
@@ -14,10 +16,28 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
   const audioRef = useRef(null);
 
   useEffect(() => {
-    const audio = audioRef.current;
+    const fetchEcho = async () => {
+      const fetchedEcho = await getEchoById(echoId);
+      setEcho(fetchedEcho);
+    };
+    fetchEcho();
+  }, [echoId]);
 
-    if (audio) {
-      // Web API: Media Session API
+  useEffect(() => {
+    if (echo && echo.audioData) {
+      const audio = audioRef.current;
+      audio.src = echo.audioData;
+
+      const updateProgress = () => {
+        setProgress((audio.currentTime / audio.duration) * 100);
+      };
+
+      audio.addEventListener('timeupdate', updateProgress);
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+        setProgress(0);
+      });
+
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: echo.title,
@@ -44,28 +64,9 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
         });
       }
 
-      // Web API: Web Audio API for visualizations
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioContext.createMediaElementSource(audio);
-      const analyser = audioContext.createAnalyser();
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
-
-      // Update progress
-      audio.addEventListener('timeupdate', () => {
-        setProgress((audio.currentTime / audio.duration) * 100);
-      });
-
-      // Playback ended
-      audio.addEventListener('ended', () => {
-        setIsPlaying(false);
-        setProgress(0);
-      });
-
       return () => {
-        audio.removeEventListener('timeupdate', () => {});
+        audio.removeEventListener('timeupdate', updateProgress);
         audio.removeEventListener('ended', () => {});
-        audioContext.close();
       };
     }
   }, [echo]);
@@ -99,6 +100,18 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
     setPlaybackSpeed(speed);
   };
 
+  const handleLike = async () => {
+    if (echo) {
+      const updatedEcho = { ...echo, likes: (echo.likes || 0) + 1 };
+      await updateEcho(updatedEcho);
+      setEcho(updatedEcho);
+    }
+  };
+
+  if (!echo) {
+    return null;
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -107,7 +120,7 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
         </Button>
         <h2 className="text-2xl font-bold mb-4">{echo.title}</h2>
         <p className="text-gray-500 mb-4">{echo.category}</p>
-        <audio ref={audioRef} src={echo.audioUrl} />
+        <audio ref={audioRef} />
         <AudioWaveform progress={progress} />
         <Slider value={[progress]} max={100} step={1} onValueChange={(value) => handleSeek(value[0])} className="mb-4" />
         <div className="flex justify-between items-center mb-4">
@@ -145,9 +158,9 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
           </select>
         </div>
         <div className="flex justify-between">
-          <Button variant="ghost" size="lg">
+          <Button variant="ghost" size="lg" onClick={handleLike}>
             <Heart className="h-6 w-6 mr-2" />
-            Like
+            Like ({echo.likes || 0})
           </Button>
           <Button variant="ghost" size="lg">
             <Mic className="h-6 w-6 mr-2" />
