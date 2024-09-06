@@ -45,3 +45,14 @@ export const updateEcho = (updatedEcho) => {
     setToStorage(ECHOES_KEY, echoes);
   }
 };
+
+export const getEchoById = (id) => {
+  const echoes = getEchoes();
+  return echoes.find(echo => echo.id === id);
+};
+
+export const deleteEcho = (id) => {
+  let echoes = getEchoes();
+  echoes = echoes.filter(echo => echo.id !== id);
+  setToStorage(ECHOES_KEY, echoes);
+};

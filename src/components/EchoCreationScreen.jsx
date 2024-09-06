@@ -17,21 +17,32 @@ const EchoCreationScreen = () => {
   const [category, setCategory] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [transcription, setTranscription] = useState('');
   const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
   const navigate = useNavigate();
 
   const mediaRecorderRef = useRef(null);
+  const audioContextRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
 
   useEffect(() => {
     setCategories(getCategories());
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
   }, []);
 
   const requestMicrophonePermission = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      const analyser = audioContextRef.current.createAnalyser();
+      source.connect(analyser);
+
       mediaRecorderRef.current = new MediaRecorder(stream);
       mediaRecorderRef.current.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
@@ -39,6 +50,8 @@ const EchoCreationScreen = () => {
       mediaRecorderRef.current.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(audioBlob);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setAudioUrl(audioUrl);
         audioChunksRef.current = [];
       };
       return true;
@@ -80,8 +93,6 @@ const EchoCreationScreen = () => {
     setIsRecording(false);
     setIsPaused(false);
     clearInterval(timerRef.current);
-    // Simulate transcription
-    setTranscription("This is a simulated transcription of the recorded echo.");
   };
 
   const formatTime = (seconds) => {
@@ -90,26 +101,30 @@ const EchoCreationScreen = () => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const saveEcho = (e) => {
+  const saveEcho = async (e) => {
     e.preventDefault();
     if (!audioBlob) {
       toast.error('Please record an echo before saving.');
       return;
     }
     try {
-      const newEcho = addEcho({
-        title,
-        category,
-        duration: recordingTime,
-        isAnonymous,
-        transcription,
-        audioBlob,
-        likes: 0,
-        replies: 0,
-        shares: 0
-      });
-      toast.success('Echo created successfully!');
-      navigate('/');
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const base64AudioMessage = reader.result;
+        const newEcho = await addEcho({
+          title,
+          category,
+          duration: recordingTime,
+          isAnonymous,
+          audioData: base64AudioMessage,
+          likes: 0,
+          replies: 0,
+          shares: 0
+        });
+        toast.success('Echo created successfully!');
+        navigate('/');
+      };
     } catch (error) {
       console.error('Error creating echo:', error);
       toast.error('Failed to create echo. Please try again.');
@@ -140,6 +155,11 @@ const EchoCreationScreen = () => {
           </Button>
         </div>
       )}
+      {audioUrl && (
+        <div className="mb-4">
+          <audio src={audioUrl} controls className="w-full" />
+        </div>
+      )}
       <div className="mb-4">
         <Label htmlFor="echo-title">Echo Title</Label>
         <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter a title for your echo" />
@@ -161,17 +181,6 @@ const EchoCreationScreen = () => {
         <Label htmlFor="anonymous-toggle">Post Anonymously</Label>
         <Switch id="anonymous-toggle" checked={isAnonymous} onCheckedChange={setIsAnonymous} />
       </div>
-      {transcription && (
-        <div className="mb-4">
-          <Label htmlFor="transcription">Transcription</Label>
-          <textarea
-            id="transcription"
-            value={transcription}
-            onChange={(e) => setTranscription(e.target.value)}
-            className="w-full h-32 p-2 border rounded"
-          />
-        </div>
-      )}
       <Button type="submit" className="w-full" disabled={!audioBlob}>
         <Save className="mr-2" />
         Share Echo
