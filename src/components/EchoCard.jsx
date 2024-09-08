@@ -61,8 +61,8 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const handleComment = () => setShowCommentModal(true);
 
   const handleCommentAdded = async (newComment) => {
-    const addedComment = await addComment(echo.id, newComment);
-    setComments((prevComments) => [addedComment, ...prevComments]);
+    setComments((prevComments) => [newComment, ...prevComments]);
+    setShowCommentModal(false);
   };
 
   return (
@@ -131,16 +131,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           </div>
         </CardFooter>
         <div className="px-4 pb-4">
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <EchoComments echoId={echo.id} comments={comments} onCommentAdded={handleCommentAdded} />
-            </motion.div>
-          </AnimatePresence>
+          <EchoComments echoId={echo.id} comments={comments} onCommentAdded={handleCommentAdded} />
         </div>
       </Card>
       {showPlayback && (
@@ -152,9 +143,12 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       {showReportModal && (
         <ReportEchoModal echoId={echo.id} isOpen={showReportModal} onClose={() => setShowReportModal(false)} />
       )}
-      {showCommentModal && (
-        <CommentModal echoId={echo.id} isOpen={showCommentModal} onClose={() => setShowCommentModal(false)} onCommentAdded={handleCommentAdded} />
-      )}
+      <CommentModal 
+        echoId={echo.id} 
+        isOpen={showCommentModal} 
+        onClose={() => setShowCommentModal(false)} 
+        onCommentAdded={handleCommentAdded} 
+      />
     </motion.div>
   );
 };

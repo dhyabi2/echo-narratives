@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import AudioPlayer from './AudioPlayer';
 import { Card, CardContent } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -7,21 +7,18 @@ import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { updateComment } from '../lib/db';
 
-const EchoComments = ({ comments: initialComments = [], onReply, onShare }) => {
-  const [comments, setComments] = useState(initialComments);
-
+const EchoComments = ({ comments, onReply, onShare }) => {
   const handleLike = async (commentId) => {
     const updatedComments = comments.map(comment =>
       comment.id === commentId
         ? { ...comment, likes: (comment.likes || 0) + 1 }
         : comment
     );
-    setComments(updatedComments);
     const updatedComment = updatedComments.find(comment => comment.id === commentId);
     await updateComment(updatedComment);
   };
 
-  const sortedComments = [...comments].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+  const sortedComments = [...comments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   return (
     <div className="space-y-4 mt-4">
