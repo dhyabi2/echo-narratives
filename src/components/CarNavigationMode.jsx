@@ -4,7 +4,6 @@ import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import { getEchoes, getTrendingTopics } from '../lib/db';
 import EchoPlayer from './EchoPlayer';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const CarNavigationMode = () => {
   const [echoes, setEchoes] = useState([]);
@@ -53,15 +52,15 @@ const CarNavigationMode = () => {
     navigate('/');
   };
 
-  const handleTrendChange = (value) => {
-    setSelectedTrend(value);
+  const handleTrendChange = (trend) => {
+    setSelectedTrend(trend);
     setCurrentEchoIndex(0);
-    filterAndSortEchoes(value, sortBy);
+    filterAndSortEchoes(trend, sortBy);
   };
 
-  const handleSortChange = (value) => {
-    setSortBy(value);
-    filterAndSortEchoes(selectedTrend, value);
+  const handleSortChange = (sort) => {
+    setSortBy(sort);
+    filterAndSortEchoes(selectedTrend, sort);
   };
 
   const filterAndSortEchoes = (trend, sort) => {
@@ -87,44 +86,55 @@ const CarNavigationMode = () => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 text-white flex flex-col items-center justify-center p-4">
       <h1 className="text-3xl font-bold mb-8">Car Navigation Mode</h1>
-      <div className="w-full max-w-md space-y-4">
-        <Select value={selectedTrend} onValueChange={handleTrendChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Trend" />
-          </SelectTrigger>
-          <SelectContent>
-            {trendingTopics.map((topic) => (
-              <SelectItem key={topic.name} value={topic.name}>{topic.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={sortBy} onValueChange={handleSortChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Sort By" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="mostLiked">Most Liked</SelectItem>
-            <SelectItem value="trending">Trending</SelectItem>
-          </SelectContent>
-        </Select>
+      
+      <div className="w-full max-w-md space-y-4 mb-8">
+        <h2 className="text-xl font-semibold mb-2">Select Trend</h2>
+        <div className="grid grid-cols-2 gap-2">
+          {trendingTopics.map((topic) => (
+            <Button
+              key={topic.name}
+              variant={selectedTrend === topic.name ? "default" : "outline"}
+              className="h-16 text-lg"
+              onClick={() => handleTrendChange(topic.name)}
+            >
+              {topic.name}
+            </Button>
+          ))}
+        </div>
       </div>
+
+      <div className="w-full max-w-md space-y-4 mb-8">
+        <h2 className="text-xl font-semibold mb-2">Sort By</h2>
+        <div className="grid grid-cols-3 gap-2">
+          {['newest', 'mostLiked', 'trending'].map((sort) => (
+            <Button
+              key={sort}
+              variant={sortBy === sort ? "default" : "outline"}
+              className="h-16 text-lg"
+              onClick={() => handleSortChange(sort)}
+            >
+              {sort.charAt(0).toUpperCase() + sort.slice(1)}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {echoes.length > 0 && (
         <div className="w-full max-w-md mt-8">
           <h2 className="text-xl mb-4">{echoes[currentEchoIndex].title}</h2>
           <EchoPlayer src={echoes[currentEchoIndex].audioData} autoPlay={isPlaying} />
           <div className="flex justify-center space-x-4 mt-8">
-            <Button onClick={togglePlayPause} size="lg">
-              {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+            <Button onClick={togglePlayPause} size="lg" className="h-16 w-16">
+              {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
             </Button>
-            <Button onClick={skipToNext} size="lg">
-              <SkipForward className="h-6 w-6" />
+            <Button onClick={skipToNext} size="lg" className="h-16 w-16">
+              <SkipForward className="h-8 w-8" />
             </Button>
           </div>
         </div>
       )}
-      <Button onClick={exitCarMode} className="mt-8" variant="secondary">
-        <ArrowLeft className="h-4 w-4 mr-2" />
+      <Button onClick={exitCarMode} className="mt-8" variant="secondary" size="lg">
+        <ArrowLeft className="h-6 w-6 mr-2" />
         Exit Car Mode
       </Button>
     </div>
