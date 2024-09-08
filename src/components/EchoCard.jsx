@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical } from 'lucide-react';
+import { Play, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -9,6 +9,7 @@ import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
+import EchoComments from './EchoComments';
 import { Badge } from './ui/badge';
 import { motion } from 'framer-motion';
 import {
@@ -25,6 +26,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const [showShareScreen, setShowShareScreen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const handleLike = async () => {
     const updatedEcho = await getEchoById(echo.id);
@@ -49,6 +51,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const handleShare = () => setShowShareScreen(true);
   const handleReport = () => setShowReportModal(true);
   const handleComment = () => setShowCommentModal(true);
+  const toggleComments = () => setShowComments(!showComments);
 
   return (
     <motion.div
@@ -117,6 +120,31 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             </Button>
           </div>
         </CardFooter>
+        <div className="px-4 pb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleComments}
+            className="w-full flex items-center justify-center"
+          >
+            {showComments ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Hide Comments
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                Show Comments
+              </>
+            )}
+          </Button>
+          {showComments && (
+            <div className="mt-4 pl-4 border-l-2 border-gray-200">
+              <EchoComments echoId={echo.id} />
+            </div>
+          )}
+        </div>
       </Card>
       {showPlayback && (
         <EchoPlaybackOverlay echo={echo} onClose={() => setShowPlayback(false)} />
