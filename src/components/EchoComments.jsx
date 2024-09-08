@@ -4,7 +4,7 @@ import { Card, CardContent } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const EchoComments = ({ comments }) => {
+const EchoComments = ({ comments = [] }) => {
   // Sort comments by likes in descending order
   const sortedComments = [...comments].sort((a, b) => (b.likes || 0) - (a.likes || 0));
 
