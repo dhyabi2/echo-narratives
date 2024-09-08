@@ -2,7 +2,6 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const countries = [
-  { code: 'Global', name: 'Global' },
   { code: 'US', name: 'United States' },
   { code: 'GB', name: 'United Kingdom' },
   { code: 'CA', name: 'Canada' },
@@ -12,13 +11,15 @@ const countries = [
   { code: 'JP', name: 'Japan' },
   { code: 'BR', name: 'Brazil' },
   { code: 'IN', name: 'India' },
+  { code: 'Global', name: 'Global' },
+  // Add more countries as needed
 ];
 
-const CountrySelector = ({ value, onChange, className }) => {
+const CountrySelector = ({ value, onChange }) => {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className={`w-[100px] ${className}`}>
-        <SelectValue placeholder="Select" />
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select a country" />
       </SelectTrigger>
       <SelectContent>
         {countries.map((country) => (

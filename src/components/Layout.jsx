@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Mic, Bell, Car, Globe } from 'lucide-react';
+import { Menu, X, Home, Mic, Bell, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import CountrySelector from './CountrySelector';
@@ -27,6 +27,7 @@ const Layout = ({ children }) => {
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Echoes</h1>
           <div className="flex items-center space-x-4">
+            <CountrySelector value={selectedCountry} onChange={setSelectedCountry} />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -59,7 +60,7 @@ const Layout = ({ children }) => {
 
       <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-sm">
         <nav className="container mx-auto px-4 py-2">
-          <ul className="flex justify-around items-center">
+          <ul className="flex justify-around">
             {navItems.map((item) => (
               <li key={item.path}>
                 <Link to={item.path} className="flex flex-col items-center">
@@ -68,16 +69,6 @@ const Layout = ({ children }) => {
                 </Link>
               </li>
             ))}
-            <li>
-              <div className="flex flex-col items-center">
-                <Globe className="h-6 w-6" />
-                <CountrySelector
-                  value={selectedCountry}
-                  onChange={setSelectedCountry}
-                  className="text-xs mt-1"
-                />
-              </div>
-            </li>
           </ul>
         </nav>
       </footer>
