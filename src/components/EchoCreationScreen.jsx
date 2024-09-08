@@ -24,11 +24,11 @@ const EchoCreationScreen = () => {
   const saveEcho = async (e) => {
     e.preventDefault();
     if (!audioBlob) {
-      toast.error('الرجاء تسجيل صدى قبل الحفظ.');
+      toast.error('الرجاء تسجيل اعتراف قبل الحفظ.');
       return;
     }
     if (!title) {
-      toast.error('الرجاء إدخال عنوان للصدى الخاص بك.');
+      toast.error('الرجاء إدخال عنوان للاعتراف الخاص بك.');
       return;
     }
     try {
@@ -45,18 +45,18 @@ const EchoCreationScreen = () => {
           country,
           createdAt: new Date().toISOString(),
         });
-        toast.success('تم إنشاء الصدى بنجاح!');
+        toast.success('تم إنشاء الاعتراف بنجاح!');
         navigate('/', { replace: true });
       };
     } catch (error) {
-      console.error('خطأ في إنشاء الصدى:', error);
-      toast.error('فشل في إنشاء الصدى. يرجى المحاولة مرة أخرى.');
+      console.error('خطأ في إنشاء الاعتراف:', error);
+      toast.error('فشل في إنشاء الاعتراف. يرجى المحاولة مرة أخرى.');
     }
   };
 
   return (
     <form onSubmit={saveEcho} className="p-4 space-y-4">
-      <h2 className="text-2xl font-bold mb-4">إنشاء صدى جديد</h2>
+      <h2 className="text-2xl font-bold mb-4">إنشاء اعتراف جديد</h2>
       <AudioRecorder onAudioRecorded={handleAudioRecorded} />
       {audioUrl && (
         <div>
@@ -64,12 +64,12 @@ const EchoCreationScreen = () => {
         </div>
       )}
       <div>
-        <Label htmlFor="echo-title">عنوان الصدى</Label>
-        <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="أدخل عنوانًا للصدى الخاص بك" />
+        <Label htmlFor="echo-title">عنوان الاعتراف</Label>
+        <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="أدخل عنوانًا للاعتراف الخاص بك" />
       </div>
       <Button type="submit" className="w-full" disabled={!audioBlob || !title}>
         <Save className="mr-2" />
-        مشاركة الصدى
+        مشاركة الاعتراف
       </Button>
     </form>
   );

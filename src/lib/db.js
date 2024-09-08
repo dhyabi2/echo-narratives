@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 14;
+const DB_VERSION = 15;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -144,8 +144,8 @@ export const updateUser = (user) => put('users', user);
   const sampleData = {
     echoes: countries.flatMap(country => [
       { 
-        title: `Welcome to Echoes in ${country}`, 
-        content: `This is your first echo in ${country}!`, 
+        title: `مرحبًا بك في اعترافات ${country}`, 
+        content: `هذا هو أول اعتراف في ${country}!`, 
         likes: 0, 
         shares: 0,
         replies: 0,
@@ -153,12 +153,12 @@ export const updateUser = (user) => put('users', user);
       }
     ]),
     badges: [
-      { name: 'Newcomer', description: 'Welcome to Echoes!', icon: '🎉' },
-      { name: 'Frequent Poster', description: 'Posted 10 echoes', icon: '🏆' },
-      { name: 'Popular Voice', description: 'Received 100 likes', icon: '🌟' },
+      { name: 'قادم جديد', description: 'مرحبًا بك في اعترافات!', icon: '🎉' },
+      { name: 'كاتب نشط', description: 'نشر 10 اعترافات', icon: '🏆' },
+      { name: 'صوت شعبي', description: 'حصل على 100 إعجاب', icon: '🌟' },
     ],
     users: countries.map(country => (
-      { username: `demo_user_${country}`, password: 'hashed_password', email: `demo_${country}@example.com`, country: country }
+      { username: `مستخدم_تجريبي_${country}`, password: 'كلمة_مرور_مشفرة', email: `تجريبي_${country}@مثال.com`, country: country }
     )),
   };
 

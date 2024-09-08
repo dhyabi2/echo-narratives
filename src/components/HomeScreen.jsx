@@ -82,7 +82,7 @@ const HomeScreen = () => {
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">تغذية الأصداء</h1>
+        <h1 className="text-3xl font-bold">تغذية الاعترافات</h1>
         <Button variant="outline" size="sm" onClick={() => {
           const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
           setSortBy(sortOptions[nextIndex]);
@@ -108,7 +108,7 @@ const HomeScreen = () => {
       </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
-      {!isLoading && sortedEchoes.length === 0 && <p>لم يتم العثور على أصداء</p>}
+      {!isLoading && sortedEchoes.length === 0 && <p>لم يتم العثور على اعترافات</p>}
     </div>
   );
 };
