@@ -79,7 +79,10 @@ const HomeScreen = () => {
     } else if (sortBy === 'Most Liked') {
       return b.likes - a.likes;
     }
-    return b.likes + b.replies - (a.likes + a.replies);
+    // Trending: combination of likes, replies, and recency
+    const aScore = a.likes + a.replies + (Date.now() - new Date(a.createdAt)) / 3600000;
+    const bScore = b.likes + b.replies + (Date.now() - new Date(b.createdAt)) / 3600000;
+    return bScore - aScore;
   });
 
   return (
