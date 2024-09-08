@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
-import { ArrowDownUp, Mic, Search } from 'lucide-react';
+import { ArrowDownUp, Mic } from 'lucide-react';
 import EchoCard from './EchoCard';
 import TrendingTopics from './TrendingTopics';
-import SearchEchoes from './SearchEchoes';
 import RecommendedEchoes from './RecommendedEchoes';
 import { getEchoes, getTrendingTopics } from '../lib/db';
-import { Input } from './ui/input';
 import { useNavigate } from 'react-router-dom';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
@@ -18,7 +16,6 @@ const HomeScreen = () => {
   const [echoes, setEchoes] = useState([]);
   const [trendingTopics, setTrendingTopics] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,9 +42,7 @@ const HomeScreen = () => {
   };
 
   const filteredEchoes = echoes.filter(echo => 
-    (activeTopic === 'All' || echo.topics.includes(activeTopic)) &&
-    (echo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     echo.content.toLowerCase().includes(searchTerm.toLowerCase()))
+    activeTopic === 'All' || echo.topics.includes(activeTopic)
   );
 
   const sortedEchoes = [...filteredEchoes].sort((a, b) => {
@@ -68,16 +63,6 @@ const HomeScreen = () => {
           <p>You are currently offline. Some features may be limited.</p>
         </div>
       )}
-
-      <div className="mb-6">
-        <Input
-          type="text"
-          placeholder="Search echoes..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full"
-        />
-      </div>
 
       <TrendingTopics />
 
