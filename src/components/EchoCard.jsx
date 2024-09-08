@@ -135,7 +135,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             ) : (
               <>
                 <ChevronDown className="h-4 w-4 mr-2" />
-                Show Comments
+                Show Comments ({echo.replies || 0})
               </>
             )}
           </Button>
