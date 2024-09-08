@@ -8,16 +8,16 @@
 1. Trending Topics
    - Horizontal scrollable bar of popular topics/trends
 
-2. Echo Feed Section
+2. Echo Feed Controls
    - Title: "Today's Top Echoes"
-   - Controls:
-     - Tab Navigation:
-       - All
-       - Latest Trends
-       - Trending Topics (dynamically populated)
-     - Sort dropdown (Trending/Newest/Most Liked)
+   - Sort button (Trending/Newest/Most Liked)
 
-3. Echo Feed
+3. Tab Navigation
+   - All
+   - Latest Trends
+   - Trending Topics (dynamically populated)
+
+4. Echo Feed
    - List of Echo Cards, each containing:
      - User avatar and name
      - Echo title and timestamp
@@ -25,7 +25,7 @@
      - Duration and trend badge
      - Interaction buttons (Play, Like, Comment, Share, Bookmark, Report)
 
-4. Recommended Echoes
+5. Recommended Echoes
    - Section title
    - List of recommended Echo Cards
 
