@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { updateComment, addReply } from '../lib/db';
 import AudioPlayer from './AudioPlayer';
 import ReplyForm from './ReplyForm';
+import { formatDateInArabic } from '../utils/dateUtils';
 
 const EchoComments = ({ comments, onReply, onShare }) => {
   const [replyingTo, setReplyingTo] = useState(null);
@@ -44,7 +45,7 @@ const EchoComments = ({ comments, onReply, onShare }) => {
       <Card className={`bg-gray-${50 + depth * 50} mb-2`}>
         <CardContent className="p-3">
           <div className="flex items-center space-x-2 mb-2">
-            <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString('ar-SA')}</span>
+            <span className="text-xs text-gray-500">{formatDateInArabic(comment.createdAt)}</span>
           </div>
           <AudioPlayer src={comment.audioData} />
           <div className="flex justify-between mt-2">
