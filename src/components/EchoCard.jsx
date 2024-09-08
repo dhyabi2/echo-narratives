@@ -130,7 +130,16 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           </div>
         </CardFooter>
         <div className="px-4 pb-4">
-          <EchoComments echoId={echo.id} comments={comments} onCommentAdded={handleCommentAdded} />
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <EchoComments echoId={echo.id} comments={comments} onCommentAdded={handleCommentAdded} />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </Card>
       {showPlayback && (
