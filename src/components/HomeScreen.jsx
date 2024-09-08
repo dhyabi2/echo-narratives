@@ -13,6 +13,7 @@ const HomeScreen = () => {
   const [sortBy, setSortBy] = useState('Trending');
   const [echoes, setEchoes] = useState([]);
   const [trendingTopics, setTrendingTopics] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const navigate = useNavigate();
 
@@ -39,7 +40,15 @@ const HomeScreen = () => {
     setEchoes(prevEchoes => prevEchoes.map(echo => echo.id === updatedEcho.id ? updatedEcho : echo));
   };
 
-  const sortedEchoes = [...echoes].sort((a, b) => {
+  const handleTopicSelect = (topic) => {
+    setSelectedTopic(topic === selectedTopic ? null : topic);
+  };
+
+  const filteredEchoes = selectedTopic
+    ? echoes.filter(echo => echo.trend === selectedTopic)
+    : echoes;
+
+  const sortedEchoes = [...filteredEchoes].sort((a, b) => {
     if (sortBy === 'Newest') {
       return new Date(b.createdAt) - new Date(a.createdAt);
     } else if (sortBy === 'Most Liked') {
@@ -58,7 +67,7 @@ const HomeScreen = () => {
         </div>
       )}
 
-      <TrendingTopics />
+      <TrendingTopics topics={trendingTopics} selectedTopic={selectedTopic} onTopicSelect={handleTopicSelect} />
 
       <div className="flex justify-end mb-6">
         <Button variant="outline" size="sm" onClick={() => {

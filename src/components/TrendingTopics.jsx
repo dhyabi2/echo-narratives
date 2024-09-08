@@ -1,22 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 
-const TrendingTopics = () => {
-  const [topics, setTopics] = useState([]);
-
-  useEffect(() => {
-    // Fetch trending topics
-    setTopics([
-      { id: 1, name: 'SummerAdventures', echoCount: 120 },
-      { id: 2, name: 'LifeHacks', echoCount: 95 },
-      { id: 3, name: 'TechTalk', echoCount: 80 },
-      { id: 4, name: 'MindfulnessMatters', echoCount: 75 },
-      { id: 5, name: 'FoodieFridays', echoCount: 70 },
-    ]);
-  }, []);
-
+const TrendingTopics = ({ topics, selectedTopic, onTopicSelect }) => {
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -28,7 +15,12 @@ const TrendingTopics = () => {
       <CardContent>
         <div className="flex flex-wrap gap-2">
           {topics.map((topic) => (
-            <Badge key={topic.id} variant="secondary" className="text-sm">
+            <Badge
+              key={topic.id}
+              variant={selectedTopic === topic.name ? "default" : "secondary"}
+              className="text-sm cursor-pointer"
+              onClick={() => onTopicSelect(topic.name)}
+            >
               #{topic.name}
               <span className="ml-1 text-xs text-gray-500">({topic.echoCount})</span>
             </Badge>
