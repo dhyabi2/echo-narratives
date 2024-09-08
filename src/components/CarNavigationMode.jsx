@@ -131,7 +131,7 @@ const CarNavigationMode = () => {
             <Button 
               onClick={togglePlayPause} 
               size="lg" 
-              className="h-16 w-16 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black transition-colors"
+              className="h-16 w-16 bg-white text-black hover:bg-gray-200 transition-colors"
             >
               {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
             </Button>
