@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 12;
+const DB_VERSION = 13;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -20,6 +20,16 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
     const repliesStore = transaction.objectStore('replies');
     if (!repliesStore.indexNames.contains('commentId')) {
       repliesStore.createIndex('commentId', 'commentId', { unique: false });
+    }
+
+    const echoesStore = transaction.objectStore('echoes');
+    if (!echoesStore.indexNames.contains('country')) {
+      echoesStore.createIndex('country', 'country', { unique: false });
+    }
+
+    const usersStore = transaction.objectStore('users');
+    if (!usersStore.indexNames.contains('country')) {
+      usersStore.createIndex('country', 'country', { unique: false });
     }
   },
 });
@@ -117,6 +127,14 @@ export const getUsers = () => getAll('users');
 export const addUser = (user) => add('users', user);
 export const updateUser = (user) => put('users', user);
 
+export const getEchoesByCountry = async (country) => {
+  const db = await dbPromise;
+  const tx = db.transaction('echoes', 'readonly');
+  const store = tx.objectStore('echoes');
+  const index = store.index('country');
+  return index.getAll(country);
+};
+
 // Initialize with sample data
 (async () => {
   const db = await dbPromise;
@@ -128,7 +146,8 @@ export const updateUser = (user) => put('users', user);
         content: 'This is your first echo!', 
         likes: 0, 
         shares: 0,
-        replies: 0
+        replies: 0,
+        country: 'Global'
       }
     ],
     badges: [
@@ -137,7 +156,7 @@ export const updateUser = (user) => put('users', user);
       { name: 'Popular Voice', description: 'Received 100 likes', icon: '🌟' },
     ],
     users: [
-      { username: 'demo_user', password: 'hashed_password', email: 'demo@example.com' }
+      { username: 'demo_user', password: 'hashed_password', email: 'demo@example.com', country: 'Global' }
     ],
   };
 

@@ -7,11 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { addEcho } from '../lib/db';
 import AudioRecorder from './AudioRecorder';
+import CountrySelector from './CountrySelector';
 
 const EchoCreationScreen = () => {
   const [title, setTitle] = useState('');
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [country, setCountry] = useState('');
   const navigate = useNavigate();
 
   const handleAudioRecorded = (blob, url) => {
@@ -29,6 +31,10 @@ const EchoCreationScreen = () => {
       toast.error('Please enter a title for your echo.');
       return;
     }
+    if (!country) {
+      toast.error('Please select a country for your echo.');
+      return;
+    }
     try {
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
@@ -40,6 +46,7 @@ const EchoCreationScreen = () => {
           likes: 0,
           replies: 0,
           shares: 0,
+          country,
           createdAt: new Date().toISOString(),
         });
         toast.success('Echo created successfully!');
@@ -64,7 +71,11 @@ const EchoCreationScreen = () => {
         <Label htmlFor="echo-title">Echo Title</Label>
         <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter a title for your echo" />
       </div>
-      <Button type="submit" className="w-full" disabled={!audioBlob || !title}>
+      <div>
+        <Label htmlFor="echo-country">Country</Label>
+        <CountrySelector value={country} onChange={setCountry} />
+      </div>
+      <Button type="submit" className="w-full" disabled={!audioBlob || !title || !country}>
         <Save className="mr-2" />
         Share Echo
       </Button>

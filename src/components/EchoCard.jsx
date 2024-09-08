@@ -108,6 +108,8 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           <p className="text-gray-700">{echo.content}</p>
           <div className="mt-4 flex items-center space-x-2 text-sm text-gray-500">
             <span>{echo.duration}</span>
+            <span>•</span>
+            <span>{echo.country}</span>
           </div>
         </CardContent>
         <CardFooter>
