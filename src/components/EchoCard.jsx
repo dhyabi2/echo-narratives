@@ -10,7 +10,6 @@ import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
 import EchoComments from './EchoComments';
-import { Badge } from './ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -107,8 +106,6 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           <p className="text-gray-700">{echo.content}</p>
           <div className="mt-4 flex items-center space-x-2 text-sm text-gray-500">
             <span>{echo.duration}</span>
-            <span>•</span>
-            <Badge variant="secondary">{echo.trend}</Badge>
           </div>
         </CardContent>
         <CardFooter>
