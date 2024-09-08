@@ -21,6 +21,9 @@ const CountrySelector = ({ value, onChange }) => {
   const [open, setOpen] = useState(false)
   const { t } = useTranslation();
 
+  // Ensure countries is always an array
+  const safeCountries = Array.isArray(countries) ? countries : [];
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -31,7 +34,7 @@ const CountrySelector = ({ value, onChange }) => {
           className="w-[200px] justify-between"
         >
           {value
-            ? countries.find((country) => country.code === value)?.flag + " " + countries.find((country) => country.code === value)?.name
+            ? safeCountries.find((country) => country.code === value)?.flag + " " + safeCountries.find((country) => country.code === value)?.name
             : t("Select country...")}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -41,7 +44,7 @@ const CountrySelector = ({ value, onChange }) => {
           <CommandInput placeholder={t("Search country...")} />
           <CommandEmpty>{t("No country found.")}</CommandEmpty>
           <CommandGroup>
-            {countries.map((country) => (
+            {safeCountries.map((country) => (
               <CommandItem
                 key={country.code}
                 value={country.code}
