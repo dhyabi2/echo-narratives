@@ -1,11 +1,11 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 7;
+const DB_VERSION = 8;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
-    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'categories'];
+    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'categories', 'latestTrends'];
     stores.forEach(store => {
       if (!db.objectStoreNames.contains(store)) {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
@@ -33,9 +33,10 @@ async function put(storeName, item) {
 export const getEchoes = () => getAll('echoes');
 export const addEcho = async (echo) => {
   const db = await dbPromise;
-  const tx = db.transaction(['echoes', 'topics'], 'readwrite');
+  const tx = db.transaction(['echoes', 'topics', 'latestTrends'], 'readwrite');
   const echoStore = tx.objectStore('echoes');
   const topicStore = tx.objectStore('topics');
+  const latestTrendsStore = tx.objectStore('latestTrends');
 
   // Add the echo
   const echoId = await echoStore.add({ ...echo, createdAt: new Date().toISOString() });
@@ -48,6 +49,19 @@ export const addEcho = async (echo) => {
   } else {
     await topicStore.add({ name: echo.trend, echoCount: 1 });
   }
+
+  // Update latest trends
+  const latestTrends = await latestTrendsStore.getAll();
+  const trendIndex = latestTrends.findIndex(trend => trend.name === echo.trend);
+  if (trendIndex !== -1) {
+    latestTrends[trendIndex].echoCount += 1;
+    latestTrends[trendIndex].lastUpdated = new Date().toISOString();
+  } else {
+    latestTrends.push({ name: echo.trend, echoCount: 1, lastUpdated: new Date().toISOString() });
+  }
+  latestTrends.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
+  await latestTrendsStore.clear();
+  await Promise.all(latestTrends.slice(0, 5).map(trend => latestTrendsStore.add(trend)));
 
   await tx.done;
   return echoId;
@@ -85,10 +99,12 @@ export const addBadge = (badge) => add('badges', badge);
 export const getCategories = () => getAll('categories');
 export const addCategory = (category) => add('categories', category);
 
+export const getLatestTrends = () => getAll('latestTrends');
+
 // Initialize with sample data
 (async () => {
   const db = await dbPromise;
-  const stores = ['echoes', 'topics', 'badges', 'categories'];
+  const stores = ['echoes', 'topics', 'badges', 'categories', 'latestTrends'];
   const sampleData = {
     echoes: [
       { 
@@ -107,6 +123,11 @@ export const addCategory = (category) => add('categories', category);
       { name: 'Popular Voice', description: 'Received 100 likes', icon: '🌟' },
     ],
     categories: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name })),
+    latestTrends: ['General', 'Music', 'News', 'Technology', 'Sports'].map((name, index) => ({ 
+      name, 
+      echoCount: 5 - index, 
+      lastUpdated: new Date(Date.now() - index * 86400000).toISOString() 
+    })),
   };
 
   for (const storeName of stores) {
