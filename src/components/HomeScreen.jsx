@@ -3,7 +3,6 @@ import { Button } from './ui/button';
 import { ArrowDownUp, Mic } from 'lucide-react';
 import EchoCard from './EchoCard';
 import TrendingTopics from './TrendingTopics';
-import RecommendedEchoes from './RecommendedEchoes';
 import { getEchoes, getTrendingTopics, addEcho } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
@@ -120,8 +119,6 @@ const HomeScreen = () => {
       </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
-
-      <RecommendedEchoes />
 
       <Button 
         className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg"
