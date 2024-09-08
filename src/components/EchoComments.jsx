@@ -27,7 +27,9 @@ const EchoComments = ({ comments, onReply, onShare }) => {
   const handleSubmitReply = async (commentId, audioBlob) => {
     const newReply = await addReply(commentId, audioBlob);
     setReplyingTo(null);
-    onReply(newReply);
+    if (typeof onReply === 'function') {
+      onReply(newReply);
+    }
   };
 
   const renderComment = (comment, depth = 0) => (
@@ -54,7 +56,7 @@ const EchoComments = ({ comments, onReply, onShare }) => {
               <MessageCircle className="h-4 w-4 mr-1" />
               <span className="text-xs">Reply</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onShare(comment.id)}>
+            <Button variant="ghost" size="sm" onClick={() => typeof onShare === 'function' && onShare(comment.id)}>
               <Share2 className="h-4 w-4 mr-1" />
               <span className="text-xs">Share</span>
             </Button>
