@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { ArrowDownUp } from 'lucide-react';
 import EchoCard from './EchoCard';
-import { getEchoes, addEcho } from '../lib/db';
+import { getEchoesByCountry, addEcho } from '../lib/db';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useCountry } from '../contexts/CountryContext';
 
 const ECHOES_PER_PAGE = 10;
 
@@ -18,6 +19,8 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const observer = useRef();
+  const { country } = useCountry();
+
   const lastEchoElementRef = useCallback(node => {
     if (isLoading) return;
     if (observer.current) observer.current.disconnect();
@@ -32,7 +35,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const fetchedEchoes = await getEchoes();
+      const fetchedEchoes = await getEchoesByCountry(country);
       setEchoes(prevEchoes => [...prevEchoes, ...fetchedEchoes.slice((page - 1) * ECHOES_PER_PAGE, page * ECHOES_PER_PAGE)]);
       setIsLoading(false);
     };
@@ -46,14 +49,14 @@ const HomeScreen = () => {
       window.removeEventListener('online', updateOnlineStatus);
       window.removeEventListener('offline', updateOnlineStatus);
     };
-  }, [page]);
+  }, [page, country]);
 
   const handleEchoUpdated = (updatedEcho) => {
     setEchoes(prevEchoes => prevEchoes.map(echo => echo.id === updatedEcho.id ? updatedEcho : echo));
   };
 
   const handleNewEcho = async (newEcho) => {
-    const addedEcho = await addEcho(newEcho);
+    const addedEcho = await addEcho({ ...newEcho, country });
     setEchoes(prevEchoes => [addedEcho, ...prevEchoes]);
   };
 

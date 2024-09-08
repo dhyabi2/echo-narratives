@@ -6,6 +6,7 @@ import { navItems } from "./nav-items";
 import Layout from "./components/Layout";
 import CarNavigationMode from "./components/CarNavigationMode";
 import { useTranslation } from 'react-i18next';
+import { CountryProvider } from './contexts/CountryContext';
 
 const queryClient = new QueryClient();
 
@@ -16,16 +17,18 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              {navItems.map(({ to, page }) => (
-                <Route key={to} path={to} element={page} />
-              ))}
-              <Route path="/car-mode" element={<CarNavigationMode />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
+        <CountryProvider>
+          <BrowserRouter>
+            <Layout>
+              <Routes>
+                {navItems.map(({ to, page }) => (
+                  <Route key={to} path={to} element={page} />
+                ))}
+                <Route path="/car-mode" element={<CarNavigationMode />} />
+              </Routes>
+            </Layout>
+          </BrowserRouter>
+        </CountryProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

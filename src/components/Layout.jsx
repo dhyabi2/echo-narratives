@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, Mic, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useTranslation } from 'react-i18next';
+import { useCountry } from '../contexts/CountryContext';
 
 const Layout = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { country, setCountry } = useCountry();
 
   const navItems = [
     { icon: Home, label: t('Home'), path: '/' },
@@ -26,6 +29,12 @@ const Layout = ({ children }) => {
     { code: 'IQ', name: 'العراق', flag: '🇮🇶' },
     { code: 'YE', name: 'اليمن', flag: '🇾🇪' },
   ];
+
+  const handleCountryChange = (countryCode) => {
+    setCountry(countryCode);
+    navigate('/');
+    setIsOpen(false);
+  };
 
   if (location.pathname === '/car-mode') {
     return <>{children}</>;
@@ -55,16 +64,16 @@ const Layout = ({ children }) => {
                     <span>{item.label}</span>
                   </Link>
                 ))}
-                {countries.map((country) => (
-                  <Link
-                    key={country.code}
-                    to={`/country/${country.code}`}
-                    className="flex items-center space-x-4 text-xl"
-                    onClick={() => setIsOpen(false)}
+                {countries.map((c) => (
+                  <Button
+                    key={c.code}
+                    variant="ghost"
+                    className="flex items-center space-x-4 text-xl justify-start"
+                    onClick={() => handleCountryChange(c.code)}
                   >
-                    <span>{country.flag}</span>
-                    <span>{country.name}</span>
-                  </Link>
+                    <span>{c.flag}</span>
+                    <span>{c.name}</span>
+                  </Button>
                 ))}
               </nav>
             </SheetContent>

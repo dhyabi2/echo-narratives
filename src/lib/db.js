@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 13;
+const DB_VERSION = 14;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -59,6 +59,14 @@ export const addEcho = (echo) => add('echoes', echo);
 export const getEchoById = (id) => get('echoes', id);
 export const updateEcho = (echo) => put('echoes', echo);
 export const deleteEcho = (id) => remove('echoes', id);
+
+export const getEchoesByCountry = async (country) => {
+  const db = await dbPromise;
+  const tx = db.transaction('echoes', 'readonly');
+  const store = tx.objectStore('echoes');
+  const index = store.index('country');
+  return index.getAll(country);
+};
 
 export const getComments = async (echoId) => {
   const db = await dbPromise;
@@ -127,37 +135,31 @@ export const getUsers = () => getAll('users');
 export const addUser = (user) => add('users', user);
 export const updateUser = (user) => put('users', user);
 
-export const getEchoesByCountry = async (country) => {
-  const db = await dbPromise;
-  const tx = db.transaction('echoes', 'readonly');
-  const store = tx.objectStore('echoes');
-  const index = store.index('country');
-  return index.getAll(country);
-};
-
-// Initialize with sample data
+// Initialize with sample data for each country
 (async () => {
   const db = await dbPromise;
   const stores = ['echoes', 'badges', 'users'];
+  const countries = ['SA', 'AE', 'OM', 'KW', 'QA', 'BH', 'IQ', 'YE'];
+  
   const sampleData = {
-    echoes: [
+    echoes: countries.flatMap(country => [
       { 
-        title: 'Welcome to Echoes', 
-        content: 'This is your first echo!', 
+        title: `Welcome to Echoes in ${country}`, 
+        content: `This is your first echo in ${country}!`, 
         likes: 0, 
         shares: 0,
         replies: 0,
-        country: 'Global'
+        country: country
       }
-    ],
+    ]),
     badges: [
       { name: 'Newcomer', description: 'Welcome to Echoes!', icon: '🎉' },
       { name: 'Frequent Poster', description: 'Posted 10 echoes', icon: '🏆' },
       { name: 'Popular Voice', description: 'Received 100 likes', icon: '🌟' },
     ],
-    users: [
-      { username: 'demo_user', password: 'hashed_password', email: 'demo@example.com', country: 'Global' }
-    ],
+    users: countries.map(country => (
+      { username: `demo_user_${country}`, password: 'hashed_password', email: `demo_${country}@example.com`, country: country }
+    )),
   };
 
   for (const storeName of stores) {
