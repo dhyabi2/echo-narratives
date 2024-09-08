@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
+import { Badge } from './ui/badge';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
   const [isLiked, setIsLiked] = useState(echo.isLiked || false);
@@ -58,7 +59,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             </Avatar>
             <div>
               <CardTitle>{echo.title}</CardTitle>
-              <p className="text-sm text-gray-500">{echo.author || 'Anonymous'} • {new Date(echo.createdAt).toLocaleDateString()}</p>
+              <p className="text-sm text-gray-500">{new Date(echo.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
         </CardHeader>
@@ -67,7 +68,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           <div className="mt-4 flex items-center space-x-2 text-sm text-gray-500">
             <span>{echo.duration}</span>
             <span>•</span>
-            <span>{echo.category}</span>
+            <Badge variant="secondary">{echo.trend}</Badge>
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">

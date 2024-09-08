@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 6;
+const DB_VERSION = 7;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -31,7 +31,27 @@ async function put(storeName, item) {
 }
 
 export const getEchoes = () => getAll('echoes');
-export const addEcho = (echo) => add('echoes', echo);
+export const addEcho = async (echo) => {
+  const db = await dbPromise;
+  const tx = db.transaction(['echoes', 'topics'], 'readwrite');
+  const echoStore = tx.objectStore('echoes');
+  const topicStore = tx.objectStore('topics');
+
+  // Add the echo
+  const echoId = await echoStore.add({ ...echo, createdAt: new Date().toISOString() });
+
+  // Update or add the topic
+  const existingTopic = await topicStore.get(echo.trend);
+  if (existingTopic) {
+    existingTopic.echoCount += 1;
+    await topicStore.put(existingTopic);
+  } else {
+    await topicStore.add({ name: echo.trend, echoCount: 1 });
+  }
+
+  await tx.done;
+  return echoId;
+};
 export const getEchoById = (id) => get('echoes', id);
 export const updateEcho = (echo) => put('echoes', echo);
 
@@ -62,7 +82,6 @@ export const clearNotifications = async () => {
 export const getBadges = () => getAll('badges');
 export const addBadge = (badge) => add('badges', badge);
 
-// Add the missing getCategories function
 export const getCategories = () => getAll('categories');
 export const addCategory = (category) => add('categories', category);
 
@@ -75,7 +94,7 @@ export const addCategory = (category) => add('categories', category);
       { 
         title: 'Welcome to Echoes', 
         content: 'This is your first echo!', 
-        topics: ['General'], 
+        trend: 'General', 
         likes: 0, 
         shares: 0,
         replies: 0
