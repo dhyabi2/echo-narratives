@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { ArrowDownUp, Mic } from 'lucide-react';
 import EchoCard from './EchoCard';
@@ -11,11 +10,9 @@ import { useNavigate } from 'react-router-dom';
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 
 const HomeScreen = () => {
-  const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('Trending');
   const [echoes, setEchoes] = useState([]);
   const [trendingTopics, setTrendingTopics] = useState([]);
-  const [latestTrends, setLatestTrends] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const navigate = useNavigate();
 
@@ -25,7 +22,6 @@ const HomeScreen = () => {
       const fetchedTopics = await getTrendingTopics();
       setEchoes(fetchedEchoes);
       setTrendingTopics(fetchedTopics);
-      setLatestTrends(fetchedTopics.slice(0, 5)); // Get the 5 most recent trends
     };
     fetchData();
 
@@ -43,11 +39,7 @@ const HomeScreen = () => {
     setEchoes(prevEchoes => prevEchoes.map(echo => echo.id === updatedEcho.id ? updatedEcho : echo));
   };
 
-  const filteredEchoes = echoes.filter(echo => 
-    activeTab === 'all' || echo.trend === activeTab
-  );
-
-  const sortedEchoes = [...filteredEchoes].sort((a, b) => {
+  const sortedEchoes = [...echoes].sort((a, b) => {
     if (sortBy === 'Newest') {
       return new Date(b.createdAt) - new Date(a.createdAt);
     } else if (sortBy === 'Most Liked') {
@@ -79,41 +71,11 @@ const HomeScreen = () => {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="latest">Latest Trends</TabsTrigger>
-          {trendingTopics.map(topic => (
-            <TabsTrigger key={topic.id} value={topic.name}>{topic.name}</TabsTrigger>
-          ))}
-        </TabsList>
-        <TabsContent value="all">
-          <div className="space-y-6">
-            {sortedEchoes.map((echo) => (
-              <EchoCard key={echo.id} echo={echo} onEchoUpdated={handleEchoUpdated} />
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="latest">
-          <div className="space-y-6">
-            {latestTrends.map((trend) => (
-              <div key={trend.id} className="p-4 bg-white rounded-lg shadow">
-                <h3 className="text-lg font-semibold">{trend.name}</h3>
-                <p className="text-sm text-gray-500">Echoes: {trend.echoCount}</p>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-        {trendingTopics.map(topic => (
-          <TabsContent key={topic.id} value={topic.name}>
-            <div className="space-y-6">
-              {sortedEchoes.filter(echo => echo.trend === topic.name).map((echo) => (
-                <EchoCard key={echo.id} echo={echo} onEchoUpdated={handleEchoUpdated} />
-              ))}
-            </div>
-          </TabsContent>
+      <div className="space-y-6">
+        {sortedEchoes.map((echo) => (
+          <EchoCard key={echo.id} echo={echo} onEchoUpdated={handleEchoUpdated} />
         ))}
-      </Tabs>
+      </div>
 
       <RecommendedEchoes />
 
