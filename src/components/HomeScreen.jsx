@@ -4,20 +4,19 @@ import { Button } from './ui/button';
 import { ArrowDownUp, Mic, Search } from 'lucide-react';
 import EchoCard from './EchoCard';
 import TrendingTopics from './TrendingTopics';
-import CategoryFilter from './CategoryFilter';
 import SearchEchoes from './SearchEchoes';
 import RecommendedEchoes from './RecommendedEchoes';
-import { getEchoes, getCategories } from '../lib/db';
+import { getEchoes, getTrendingTopics } from '../lib/db';
 import { Input } from './ui/input';
 import { useNavigate } from 'react-router-dom';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 
 const HomeScreen = () => {
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeTopic, setActiveTopic] = useState('All');
   const [sortBy, setSortBy] = useState('Trending');
   const [echoes, setEchoes] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [trendingTopics, setTrendingTopics] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
@@ -25,9 +24,9 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       const fetchedEchoes = await getEchoes();
-      const fetchedCategories = await getCategories();
+      const fetchedTopics = await getTrendingTopics();
       setEchoes(fetchedEchoes);
-      setCategories(['All', ...fetchedCategories.map(cat => cat.name)]);
+      setTrendingTopics(['All', ...fetchedTopics.map(topic => topic.name)]);
     };
     fetchData();
 
@@ -46,7 +45,7 @@ const HomeScreen = () => {
   };
 
   const filteredEchoes = echoes.filter(echo => 
-    (activeCategory === 'All' || echo.category === activeCategory) &&
+    (activeTopic === 'All' || echo.topics.includes(activeTopic)) &&
     (echo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
      echo.content.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -80,7 +79,20 @@ const HomeScreen = () => {
         />
       </div>
 
-      <CategoryFilter categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+      <div className="mb-6 overflow-x-auto">
+        <div className="flex space-x-2">
+          {trendingTopics.map((topic) => (
+            <Button
+              key={topic}
+              variant={activeTopic === topic ? 'default' : 'outline'}
+              onClick={() => setActiveTopic(topic)}
+              className="whitespace-nowrap"
+            >
+              {topic}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Today's Top Echoes</h2>
@@ -92,8 +104,6 @@ const HomeScreen = () => {
           {sortBy}
         </Button>
       </div>
-
-      <TrendingTopics />
 
       <div className="space-y-6 mt-6">
         {sortedEchoes.map((echo) => (

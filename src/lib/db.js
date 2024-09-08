@@ -1,11 +1,11 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
-    const stores = ['echoes', 'categories', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges'];
+    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges'];
     stores.forEach(store => {
       if (!db.objectStoreNames.contains(store)) {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
@@ -35,8 +35,8 @@ export const addEcho = (echo) => add('echoes', echo);
 export const getEchoById = (id) => get('echoes', id);
 export const updateEcho = (echo) => put('echoes', echo);
 
-export const getCategories = () => getAll('categories');
-export const addCategory = (category) => add('categories', category);
+export const getTrendingTopics = () => getAll('topics');
+export const addTopic = (topic) => add('topics', topic);
 
 export const getComments = async (echoId) => {
   const db = await dbPromise;
@@ -65,10 +65,19 @@ export const addBadge = (badge) => add('badges', badge);
 // Initialize with sample data
 (async () => {
   const db = await dbPromise;
-  const stores = ['echoes', 'categories', 'badges'];
+  const stores = ['echoes', 'topics', 'badges'];
   const sampleData = {
-    echoes: [{ title: 'Welcome to Echoes', content: 'This is your first echo!', category: 'General', likes: 0, shares: 0 }],
-    categories: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name })),
+    echoes: [
+      { 
+        title: 'Welcome to Echoes', 
+        content: 'This is your first echo!', 
+        topics: ['General'], 
+        likes: 0, 
+        shares: 0,
+        replies: 0
+      }
+    ],
+    topics: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name, echoCount: 0 })),
     badges: [
       { name: 'Newcomer', description: 'Welcome to Echoes!', icon: '🎉' },
       { name: 'Frequent Poster', description: 'Posted 10 echoes', icon: '🏆' },
