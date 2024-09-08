@@ -3,8 +3,8 @@ import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from './ui/button';
 import { Slider } from './ui/slider';
 
-const EchoPlayer = ({ src }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+const EchoPlayer = ({ src, autoPlay = false }) => {
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
@@ -18,6 +18,12 @@ const EchoPlayer = ({ src }) => {
       audio.removeEventListener('timeupdate', () => {});
     };
   }, []);
+
+  useEffect(() => {
+    if (autoPlay) {
+      audioRef.current.play();
+    }
+  }, [autoPlay, src]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;

@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, Home, Mic, Bell } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Home, Mic, Bell, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 
 const Layout = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: Mic, label: 'Record', path: '/record' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
+    { icon: Car, label: 'Car Mode', path: '/car-mode' },
   ];
+
+  if (location.pathname === '/car-mode') {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
