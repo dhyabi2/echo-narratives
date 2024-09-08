@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -11,7 +11,7 @@ import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
 import EchoComments from './EchoComments';
 import { Badge } from './ui/badge';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,15 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const [showShareScreen, setShowShareScreen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
+  const [comments, setComments] = useState([]);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      const updatedEcho = await getEchoById(echo.id);
+      setComments(updatedEcho.comments || []);
+    };
+    fetchComments();
+  }, [echo.id]);
 
   const handleLike = async () => {
     const updatedEcho = await getEchoById(echo.id);
@@ -50,6 +59,10 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const handleShare = () => setShowShareScreen(true);
   const handleReport = () => setShowReportModal(true);
   const handleComment = () => setShowCommentModal(true);
+
+  const handleCommentAdded = (newComment) => {
+    setComments((prevComments) => [newComment, ...prevComments]);
+  };
 
   return (
     <motion.div
@@ -110,7 +123,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleComment} className="flex items-center justify-center">
               <MessageCircle className="h-4 w-4 mr-1" />
-              {echo.replies || 0}
+              {comments.length}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
               <Share2 className="h-4 w-4 mr-1" />
@@ -119,7 +132,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           </div>
         </CardFooter>
         <div className="px-4 pb-4">
-          <EchoComments echoId={echo.id} />
+          <EchoComments echoId={echo.id} comments={comments} onCommentAdded={handleCommentAdded} />
         </div>
       </Card>
       {showPlayback && (
@@ -132,7 +145,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
         <ReportEchoModal echoId={echo.id} isOpen={showReportModal} onClose={() => setShowReportModal(false)} />
       )}
       {showCommentModal && (
-        <CommentModal echoId={echo.id} isOpen={showCommentModal} onClose={() => setShowCommentModal(false)} />
+        <CommentModal echoId={echo.id} isOpen={showCommentModal} onClose={() => setShowCommentModal(false)} onCommentAdded={handleCommentAdded} />
       )}
     </motion.div>
   );
