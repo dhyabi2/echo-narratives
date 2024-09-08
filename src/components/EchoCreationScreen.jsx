@@ -7,14 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { addEcho } from '../lib/db';
 import AudioRecorder from './AudioRecorder';
-import CountrySelector from './CountrySelector';
+import { useCountry } from '../contexts/CountryContext';
 
 const EchoCreationScreen = () => {
   const [title, setTitle] = useState('');
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
-  const [country, setCountry] = useState('');
   const navigate = useNavigate();
+  const { country } = useCountry();
 
   const handleAudioRecorded = (blob, url) => {
     setAudioBlob(blob);
@@ -24,15 +24,11 @@ const EchoCreationScreen = () => {
   const saveEcho = async (e) => {
     e.preventDefault();
     if (!audioBlob) {
-      toast.error('Please record an echo before saving.');
+      toast.error('الرجاء تسجيل صدى قبل الحفظ.');
       return;
     }
     if (!title) {
-      toast.error('Please enter a title for your echo.');
-      return;
-    }
-    if (!country) {
-      toast.error('Please select a country for your echo.');
+      toast.error('الرجاء إدخال عنوان للصدى الخاص بك.');
       return;
     }
     try {
@@ -49,18 +45,18 @@ const EchoCreationScreen = () => {
           country,
           createdAt: new Date().toISOString(),
         });
-        toast.success('Echo created successfully!');
+        toast.success('تم إنشاء الصدى بنجاح!');
         navigate('/', { replace: true });
       };
     } catch (error) {
-      console.error('Error creating echo:', error);
-      toast.error('Failed to create echo. Please try again.');
+      console.error('خطأ في إنشاء الصدى:', error);
+      toast.error('فشل في إنشاء الصدى. يرجى المحاولة مرة أخرى.');
     }
   };
 
   return (
     <form onSubmit={saveEcho} className="p-4 space-y-4">
-      <h2 className="text-2xl font-bold mb-4">Create New Echo</h2>
+      <h2 className="text-2xl font-bold mb-4">إنشاء صدى جديد</h2>
       <AudioRecorder onAudioRecorded={handleAudioRecorded} />
       {audioUrl && (
         <div>
@@ -68,16 +64,12 @@ const EchoCreationScreen = () => {
         </div>
       )}
       <div>
-        <Label htmlFor="echo-title">Echo Title</Label>
-        <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter a title for your echo" />
+        <Label htmlFor="echo-title">عنوان الصدى</Label>
+        <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="أدخل عنوانًا للصدى الخاص بك" />
       </div>
-      <div>
-        <Label htmlFor="echo-country">Country</Label>
-        <CountrySelector value={country} onChange={setCountry} />
-      </div>
-      <Button type="submit" className="w-full" disabled={!audioBlob || !title || !country}>
+      <Button type="submit" className="w-full" disabled={!audioBlob || !title}>
         <Save className="mr-2" />
-        Share Echo
+        مشاركة الصدى
       </Button>
     </form>
   );
