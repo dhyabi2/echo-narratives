@@ -91,10 +91,10 @@ const CarNavigationMode = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 text-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-8">Car Navigation Mode</h1>
-      
-      <div className="w-full max-w-md space-y-4 mb-8">
+    <div className="fixed inset-0 bg-black bg-opacity-90 text-white flex flex-col items-center justify-between p-4">
+      <div className="w-full max-w-md space-y-4">
+        <h1 className="text-3xl font-bold mb-8 text-center">Car Navigation Mode</h1>
+        
         <h2 className="text-xl font-semibold mb-2">Select Trend</h2>
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex space-x-2">
@@ -111,31 +111,33 @@ const CarNavigationMode = () => {
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
-      </div>
 
-      <div className="w-full max-w-md space-y-4 mb-8">
-        <h2 className="text-xl font-semibold mb-2">Sort By</h2>
-        <div className="flex justify-between">
-          {['newest', 'mostLiked', 'trending'].map((sort) => (
-            <Button
-              key={sort}
-              variant="ghost"
-              className={`text-lg ${sortBy === sort ? 'text-white underline' : 'text-gray-400'}`}
-              onClick={() => handleSortChange(sort)}
-            >
-              {sort.charAt(0).toUpperCase() + sort.slice(1)}
-            </Button>
-          ))}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold mb-2">Sort By</h2>
+          <div className="flex justify-between">
+            {['newest', 'mostLiked', 'trending'].map((sort) => (
+              <Button
+                key={sort}
+                variant="ghost"
+                className={`text-lg ${sortBy === sort ? 'text-white underline' : 'text-gray-400'}`}
+                onClick={() => handleSortChange(sort)}
+              >
+                {sort.charAt(0).toUpperCase() + sort.slice(1)}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
       {echoes.length > 0 && (
-        <div className="w-full max-w-md mt-8">
-          <h2 className="text-xl mb-4">{echoes[currentEchoIndex].title}</h2>
-          <EchoPlayer src={echoes[currentEchoIndex].audioData} autoPlay={isPlaying} />
+        <div className="w-full max-w-md flex-grow flex flex-col justify-center">
+          <h2 className="text-xl mb-4 text-center">{echoes[currentEchoIndex].title}</h2>
+          <div className="flex-grow flex items-center">
+            <EchoPlayer src={echoes[currentEchoIndex].audioData} autoPlay={isPlaying} />
+          </div>
           <div className="flex justify-center space-x-4 mt-8">
             <Button 
-              onClick={skipToPrevious} 
+              onClick={skipPrevious} 
               size="lg" 
               className="h-16 w-16 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black transition-colors"
             >
@@ -158,6 +160,7 @@ const CarNavigationMode = () => {
           </div>
         </div>
       )}
+
       <Button 
         onClick={exitCarMode} 
         className="mt-8 bg-white text-black hover:bg-gray-200 border-2 border-white" 
