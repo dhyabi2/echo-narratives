@@ -67,8 +67,8 @@ const HomeScreen = () => {
       return (b.likes || 0) - (a.likes || 0);
     } else {
       // الأكثر رواجًا: مزيج من الإعجابات والردود والحداثة
-      const aScore = (a.likes || 0) + (a.replies || 0) + (Date.now() - new Date(a.createdAt)) / 3600000;
-      const bScore = (b.likes || 0) + (b.replies || 0) + (Date.now() - new Date(b.createdAt)) / 3600000;
+      const aScore = ((a.likes || 0) + (a.replies || 0)) * (1 / (Date.now() - new Date(a.createdAt).getTime()));
+      const bScore = ((b.likes || 0) + (b.replies || 0)) * (1 / (Date.now() - new Date(b.createdAt).getTime()));
       return bScore - aScore;
     }
   });
