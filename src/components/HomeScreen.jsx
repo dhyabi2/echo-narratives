@@ -60,8 +60,7 @@ const HomeScreen = () => {
 
       <TrendingTopics />
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Today's Top Echoes</h2>
+      <div className="flex justify-end mb-6">
         <Button variant="outline" size="sm" onClick={() => {
           const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
           setSortBy(sortOptions[nextIndex]);
