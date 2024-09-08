@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipForward, ArrowLeft } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import { getEchoes, getTrendingTopics } from '../lib/db';
@@ -46,6 +46,12 @@ const CarNavigationMode = () => {
   const skipToNext = () => {
     if (currentEchoIndex < echoes.length - 1) {
       setCurrentEchoIndex(prevIndex => prevIndex + 1);
+    }
+  };
+
+  const skipToPrevious = () => {
+    if (currentEchoIndex > 0) {
+      setCurrentEchoIndex(prevIndex => prevIndex - 1);
     }
   };
 
@@ -129,6 +135,13 @@ const CarNavigationMode = () => {
           <EchoPlayer src={echoes[currentEchoIndex].audioData} autoPlay={isPlaying} />
           <div className="flex justify-center space-x-4 mt-8">
             <Button 
+              onClick={skipToPrevious} 
+              size="lg" 
+              className="h-16 w-16 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black transition-colors"
+            >
+              <SkipBack className="h-8 w-8 text-white" />
+            </Button>
+            <Button 
               onClick={togglePlayPause} 
               size="lg" 
               className="h-16 w-16 bg-white text-black hover:bg-gray-200 transition-colors"
@@ -140,7 +153,7 @@ const CarNavigationMode = () => {
               size="lg" 
               className="h-16 w-16 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black transition-colors"
             >
-              <SkipForward className="h-8 w-8" />
+              <SkipForward className="h-8 w-8 text-white" />
             </Button>
           </div>
         </div>
