@@ -5,21 +5,22 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
+import { updateComment } from '../lib/db';
 
 const EchoComments = ({ comments: initialComments = [], onReply, onShare }) => {
   const [comments, setComments] = useState(initialComments);
 
-  const handleLike = (commentId) => {
-    setComments(prevComments =>
-      prevComments.map(comment =>
-        comment.id === commentId
-          ? { ...comment, likes: (comment.likes || 0) + 1 }
-          : comment
-      )
+  const handleLike = async (commentId) => {
+    const updatedComments = comments.map(comment =>
+      comment.id === commentId
+        ? { ...comment, likes: (comment.likes || 0) + 1 }
+        : comment
     );
+    setComments(updatedComments);
+    const updatedComment = updatedComments.find(comment => comment.id === commentId);
+    await updateComment(updatedComment);
   };
 
-  // Sort comments by likes in descending order
   const sortedComments = [...comments].sort((a, b) => (b.likes || 0) - (a.likes || 0));
 
   return (

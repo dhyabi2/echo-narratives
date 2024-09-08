@@ -1,11 +1,11 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 8;
+const DB_VERSION = 9;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
-    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'categories', 'latestTrends'];
+    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'categories', 'latestTrends', 'users'];
     stores.forEach(store => {
       if (!db.objectStoreNames.contains(store)) {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
@@ -30,6 +30,10 @@ async function put(storeName, item) {
   return (await dbPromise).put(storeName, item);
 }
 
+async function remove(storeName, id) {
+  return (await dbPromise).delete(storeName, id);
+}
+
 export const getEchoes = () => getAll('echoes');
 export const addEcho = async (echo) => {
   const db = await dbPromise;
@@ -38,10 +42,8 @@ export const addEcho = async (echo) => {
   const topicStore = tx.objectStore('topics');
   const latestTrendsStore = tx.objectStore('latestTrends');
 
-  // Add the echo
   const echoId = await echoStore.add({ ...echo, createdAt: new Date().toISOString() });
 
-  // Update or add the topic
   const existingTopic = await topicStore.get(echo.trend);
   if (existingTopic) {
     existingTopic.echoCount += 1;
@@ -50,7 +52,6 @@ export const addEcho = async (echo) => {
     await topicStore.add({ name: echo.trend, echoCount: 1 });
   }
 
-  // Update latest trends
   const latestTrends = await latestTrendsStore.getAll();
   const trendIndex = latestTrends.findIndex(trend => trend.name === echo.trend);
   if (trendIndex !== -1) {
@@ -68,23 +69,21 @@ export const addEcho = async (echo) => {
 };
 export const getEchoById = (id) => get('echoes', id);
 export const updateEcho = (echo) => put('echoes', echo);
+export const deleteEcho = (id) => remove('echoes', id);
 
 export const getTrendingTopics = () => getAll('topics');
 export const addTopic = (topic) => add('topics', topic);
 
-export const getComments = async (echoId) => {
-  const db = await dbPromise;
-  const tx = db.transaction('comments', 'readonly');
-  const store = tx.objectStore('comments');
-  return store.getAll(IDBKeyRange.only(echoId));
-};
-export const addComment = async (echoId, audioData) => {
-  const comment = { echoId, audioData, createdAt: new Date().toISOString() };
-  return add('comments', comment);
-};
+export const getComments = (echoId) => getAll('comments').then(comments => comments.filter(comment => comment.echoId === echoId));
+export const addComment = (comment) => add('comments', comment);
+export const updateComment = (comment) => put('comments', comment);
 
 export const getTags = () => getAll('tags');
 export const addTag = (tag) => add('tags', tag);
+
+export const getBookmarks = () => getAll('bookmarks');
+export const addBookmark = (bookmark) => add('bookmarks', bookmark);
+export const removeBookmark = (id) => remove('bookmarks', id);
 
 export const reportEcho = (report) => add('reports', report);
 
@@ -104,10 +103,14 @@ export const addCategory = (category) => add('categories', category);
 
 export const getLatestTrends = () => getAll('latestTrends');
 
+export const getUsers = () => getAll('users');
+export const addUser = (user) => add('users', user);
+export const updateUser = (user) => put('users', user);
+
 // Initialize with sample data
 (async () => {
   const db = await dbPromise;
-  const stores = ['echoes', 'topics', 'badges', 'categories', 'latestTrends'];
+  const stores = ['echoes', 'topics', 'badges', 'categories', 'latestTrends', 'users'];
   const sampleData = {
     echoes: [
       { 
@@ -131,6 +134,9 @@ export const getLatestTrends = () => getAll('latestTrends');
       echoCount: name === 'General' ? 1 : 5 - index, 
       lastUpdated: new Date(Date.now() - index * 86400000).toISOString() 
     })),
+    users: [
+      { username: 'demo_user', password: 'hashed_password', email: 'demo@example.com' }
+    ],
   };
 
   for (const storeName of stores) {

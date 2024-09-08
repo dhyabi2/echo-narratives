@@ -3,7 +3,7 @@ import { Play, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical } from
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { updateEcho, getEchoById } from '../lib/db';
+import { updateEcho, getEchoById, addBookmark, removeBookmark } from '../lib/db';
 import { toast } from 'sonner';
 import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import ShareEchoScreen from './ShareEchoScreen';
@@ -46,11 +46,12 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   };
 
   const handleBookmark = async () => {
-    const updatedEcho = await getEchoById(echo.id);
-    updatedEcho.isBookmarked = !isBookmarked;
-    await updateEcho(updatedEcho);
+    if (isBookmarked) {
+      await removeBookmark(echo.id);
+    } else {
+      await addBookmark({ echoId: echo.id });
+    }
     setIsBookmarked(!isBookmarked);
-    onEchoUpdated(updatedEcho);
     toast.success(isBookmarked ? 'Echo removed from bookmarks' : 'Echo bookmarked');
   };
 
