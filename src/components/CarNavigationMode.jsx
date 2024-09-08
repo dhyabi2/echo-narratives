@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Pause, SkipForward, SkipBack, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
-import { getEchoes, getTrendingTopics } from '../lib/db';
+import { getEchoes } from '../lib/db';
 import EchoPlayer from './EchoPlayer';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 
@@ -10,15 +10,11 @@ const CarNavigationMode = () => {
   const [echoes, setEchoes] = useState([]);
   const [currentEchoIndex, setCurrentEchoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [trendingTopics, setTrendingTopics] = useState([]);
-  const [selectedTrend, setSelectedTrend] = useState('All');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       const fetchedEchoes = await getEchoes();
-      const fetchedTopics = await getTrendingTopics();
-      setTrendingTopics([{ name: 'All' }, ...fetchedTopics]);
       setEchoes(fetchedEchoes);
     };
     fetchData();
@@ -58,37 +54,10 @@ const CarNavigationMode = () => {
     navigate('/');
   };
 
-  const handleTrendChange = (trend) => {
-    setSelectedTrend(trend);
-    setCurrentEchoIndex(0);
-    filterEchoes(trend);
-  };
-
-  const filterEchoes = (trend) => {
-    const filteredEchoes = trend === 'All' ? echoes : echoes.filter(echo => echo.trend === trend);
-    setEchoes(filteredEchoes);
-  };
-
   return (
     <div className="fixed inset-0 bg-gray-100 text-gray-800 flex flex-col items-center justify-between p-4">
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold mb-4 text-center">Car Mode</h1>
-        
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex space-x-2">
-            {trendingTopics.map((topic) => (
-              <Button
-                key={topic.name}
-                variant={selectedTrend === topic.name ? "default" : "outline"}
-                className="h-10 text-sm"
-                onClick={() => handleTrendChange(topic.name)}
-              >
-                {topic.name}
-              </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
       </div>
 
       {echoes.length > 0 && (
