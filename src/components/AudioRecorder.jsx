@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Pause, Square, Play } from 'lucide-react';
 import { Button } from './ui/button';
+import { Progress } from './ui/progress';
+
+const MAX_RECORDING_TIME = 60; // 1 minute in seconds
 
 const AudioRecorder = ({ onAudioRecorded }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -40,7 +43,7 @@ const AudioRecorder = ({ onAudioRecorded }) => {
       return true;
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      toast.error('Unable to access microphone. Please check your browser settings.');
+      alert('Unable to access microphone. Please check your browser settings.');
       return false;
     }
   };
@@ -54,14 +57,26 @@ const AudioRecorder = ({ onAudioRecorded }) => {
       setIsRecording(true);
       setIsPaused(false);
       timerRef.current = setInterval(() => {
-        setRecordingTime((prevTime) => prevTime + 1);
+        setRecordingTime((prevTime) => {
+          if (prevTime >= MAX_RECORDING_TIME - 1) {
+            stopRecording();
+            return MAX_RECORDING_TIME;
+          }
+          return prevTime + 1;
+        });
       }, 1000);
     } else {
       if (isPaused) {
         mediaRecorderRef.current.resume();
         setIsPaused(false);
         timerRef.current = setInterval(() => {
-          setRecordingTime((prevTime) => prevTime + 1);
+          setRecordingTime((prevTime) => {
+            if (prevTime >= MAX_RECORDING_TIME - 1) {
+              stopRecording();
+              return MAX_RECORDING_TIME;
+            }
+            return prevTime + 1;
+          });
         }, 1000);
       } else {
         mediaRecorderRef.current.pause();
@@ -85,22 +100,27 @@ const AudioRecorder = ({ onAudioRecorded }) => {
   };
 
   return (
-    <div>
-      <div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
         <Button
           type="button"
           variant={isRecording ? (isPaused ? 'outline' : 'destructive') : 'default'}
           size="lg"
           className="w-full"
           onClick={toggleRecording}
+          disabled={recordingTime >= MAX_RECORDING_TIME}
         >
           {isRecording ? (isPaused ? <Play className="mr-2" /> : <Pause className="mr-2" />) : <Mic className="mr-2" />}
           {isRecording ? (isPaused ? 'Resume' : 'Pause') : 'Start Recording'}
         </Button>
       </div>
       {isRecording && (
-        <div>
-          <p className="text-center font-semibold">{formatTime(recordingTime)}</p>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">{formatTime(recordingTime)}</span>
+            <span className="text-sm font-medium">{formatTime(MAX_RECORDING_TIME)}</span>
+          </div>
+          <Progress value={(recordingTime / MAX_RECORDING_TIME) * 100} className="w-full" />
           <Button type="button" variant="outline" size="lg" className="w-full mt-2" onClick={stopRecording}>
             <Square className="mr-2" />
             Stop Recording
