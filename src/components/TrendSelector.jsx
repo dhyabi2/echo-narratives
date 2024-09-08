@@ -15,7 +15,7 @@ const TrendSelector = ({ onTrendChange }) => {
   useEffect(() => {
     const fetchTrends = async () => {
       const fetchedTrends = await getTrendingTopics();
-      setTrends(fetchedTrends);
+      setTrends([{ name: 'General', id: 'general' }, ...fetchedTrends]);
     };
     fetchTrends();
   }, []);

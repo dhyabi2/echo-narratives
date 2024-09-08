@@ -135,7 +135,7 @@ export const getLatestTrends = () => getAll('latestTrends');
         replies: 0
       }
     ],
-    topics: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name, echoCount: 0 })),
+    topics: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name, echoCount: name === 'General' ? 1 : 0 })),
     badges: [
       { name: 'Newcomer', description: 'Welcome to Echoes!', icon: '🎉' },
       { name: 'Frequent Poster', description: 'Posted 10 echoes', icon: '🏆' },
@@ -144,7 +144,7 @@ export const getLatestTrends = () => getAll('latestTrends');
     categories: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name })),
     latestTrends: ['General', 'Music', 'News', 'Technology', 'Sports'].map((name, index) => ({ 
       name, 
-      echoCount: 5 - index, 
+      echoCount: name === 'General' ? 1 : 5 - index, 
       lastUpdated: new Date(Date.now() - index * 86400000).toISOString() 
     })),
   };
