@@ -137,7 +137,7 @@ const CarNavigationMode = () => {
           </div>
           <div className="flex justify-center space-x-4 mt-8">
             <Button 
-              onClick={skipPrevious} 
+              onClick={skipToPrevious} 
               size="lg" 
               className="h-16 w-16 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black transition-colors"
             >
