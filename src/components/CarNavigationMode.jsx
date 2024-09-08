@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import { getEchoes, getTrendingTopics } from '../lib/db';
 import EchoPlayer from './EchoPlayer';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
 
 const CarNavigationMode = () => {
   const [echoes, setEchoes] = useState([]);
@@ -89,28 +90,31 @@ const CarNavigationMode = () => {
       
       <div className="w-full max-w-md space-y-4 mb-8">
         <h2 className="text-xl font-semibold mb-2">Select Trend</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {trendingTopics.map((topic) => (
-            <Button
-              key={topic.name}
-              variant={selectedTrend === topic.name ? "default" : "outline"}
-              className="h-16 text-lg"
-              onClick={() => handleTrendChange(topic.name)}
-            >
-              {topic.name}
-            </Button>
-          ))}
-        </div>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex space-x-2">
+            {trendingTopics.map((topic) => (
+              <Button
+                key={topic.name}
+                variant={selectedTrend === topic.name ? "default" : "outline"}
+                className="h-16 text-lg text-white hover:bg-white hover:text-black transition-colors"
+                onClick={() => handleTrendChange(topic.name)}
+              >
+                {topic.name}
+              </Button>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
 
       <div className="w-full max-w-md space-y-4 mb-8">
         <h2 className="text-xl font-semibold mb-2">Sort By</h2>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="flex justify-between">
           {['newest', 'mostLiked', 'trending'].map((sort) => (
             <Button
               key={sort}
-              variant={sortBy === sort ? "default" : "outline"}
-              className="h-16 text-lg"
+              variant="ghost"
+              className={`text-lg ${sortBy === sort ? 'text-white underline' : 'text-gray-400'}`}
               onClick={() => handleSortChange(sort)}
             >
               {sort.charAt(0).toUpperCase() + sort.slice(1)}
@@ -124,10 +128,10 @@ const CarNavigationMode = () => {
           <h2 className="text-xl mb-4">{echoes[currentEchoIndex].title}</h2>
           <EchoPlayer src={echoes[currentEchoIndex].audioData} autoPlay={isPlaying} />
           <div className="flex justify-center space-x-4 mt-8">
-            <Button onClick={togglePlayPause} size="lg" className="h-16 w-16">
+            <Button onClick={togglePlayPause} size="lg" className="h-16 w-16 text-white hover:bg-white hover:text-black transition-colors">
               {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
             </Button>
-            <Button onClick={skipToNext} size="lg" className="h-16 w-16">
+            <Button onClick={skipToNext} size="lg" className="h-16 w-16 text-white hover:bg-white hover:text-black transition-colors">
               <SkipForward className="h-8 w-8" />
             </Button>
           </div>
