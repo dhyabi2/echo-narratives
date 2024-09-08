@@ -19,6 +19,12 @@ const Layout = ({ children }) => {
   const countries = [
     { code: 'SA', name: 'المملكة العربية السعودية', flag: '🇸🇦' },
     { code: 'AE', name: 'الإمارات العربية المتحدة', flag: '🇦🇪' },
+    { code: 'OM', name: 'عمان', flag: '🇴🇲' },
+    { code: 'KW', name: 'الكويت', flag: '🇰🇼' },
+    { code: 'QA', name: 'قطر', flag: '🇶🇦' },
+    { code: 'BH', name: 'البحرين', flag: '🇧🇭' },
+    { code: 'IQ', name: 'العراق', flag: '🇮🇶' },
+    { code: 'YE', name: 'اليمن', flag: '🇾🇪' },
   ];
 
   if (location.pathname === '/car-mode') {
