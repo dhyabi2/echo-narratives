@@ -3,7 +3,7 @@ import { Play, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical } from
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { updateEcho, getEchoById, addBookmark, removeBookmark } from '../lib/db';
+import { updateEcho, getEchoById, addBookmark, removeBookmark, getComments, addComment } from '../lib/db';
 import { toast } from 'sonner';
 import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import ShareEchoScreen from './ShareEchoScreen';
@@ -29,8 +29,8 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
 
   useEffect(() => {
     const fetchComments = async () => {
-      const updatedEcho = await getEchoById(echo.id);
-      setComments(updatedEcho?.comments || []);
+      const fetchedComments = await getComments(echo.id);
+      setComments(fetchedComments);
     };
     fetchComments();
   }, [echo.id]);
@@ -60,8 +60,9 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const handleReport = () => setShowReportModal(true);
   const handleComment = () => setShowCommentModal(true);
 
-  const handleCommentAdded = (newComment) => {
-    setComments((prevComments) => [newComment, ...prevComments]);
+  const handleCommentAdded = async (newComment) => {
+    const addedComment = await addComment(echo.id, newComment);
+    setComments((prevComments) => [addedComment, ...prevComments]);
   };
 
   return (

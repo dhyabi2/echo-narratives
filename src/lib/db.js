@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 9;
+const DB_VERSION = 10;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -11,6 +11,12 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
       }
     });
+    
+    // Add index for echoId in comments store
+    const commentsStore = transaction.objectStore('comments');
+    if (!commentsStore.indexNames.contains('echoId')) {
+      commentsStore.createIndex('echoId', 'echoId', { unique: false });
+    }
   },
 });
 
@@ -74,8 +80,18 @@ export const deleteEcho = (id) => remove('echoes', id);
 export const getTrendingTopics = () => getAll('topics');
 export const addTopic = (topic) => add('topics', topic);
 
-export const getComments = (echoId) => getAll('comments').then(comments => comments.filter(comment => comment.echoId === echoId));
-export const addComment = (comment) => add('comments', comment);
+export const getComments = async (echoId) => {
+  const db = await dbPromise;
+  const tx = db.transaction('comments', 'readonly');
+  const store = tx.objectStore('comments');
+  const index = store.index('echoId');
+  return index.getAll(echoId);
+};
+export const addComment = async (echoId, comment) => {
+  const newComment = { ...comment, echoId, createdAt: new Date().toISOString() };
+  const id = await add('comments', newComment);
+  return { ...newComment, id };
+};
 export const updateComment = (comment) => put('comments', comment);
 
 export const getTags = () => getAll('tags');
