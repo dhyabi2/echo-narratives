@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Play, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -10,8 +10,9 @@ import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
 import EchoComments from './EchoComments';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { formatDateInArabic } from '../utils/dateUtils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +30,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [comments, setComments] = useState([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchComments = async () => {
       const fetchedComments = await getComments(echo.id);
       setComments(fetchedComments);
@@ -84,7 +85,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
               </Avatar>
               <div>
                 <CardTitle>{echo.title}</CardTitle>
-                <p className="text-sm text-gray-500">{new Date(echo.createdAt).toLocaleDateString('ar-EG')}</p>
+                <p className="text-sm text-gray-500">{formatDateInArabic(echo.createdAt)}</p>
               </div>
             </div>
             <DropdownMenu>
