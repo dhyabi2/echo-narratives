@@ -77,12 +77,13 @@ const HomeScreen = () => {
     if (sortBy === 'Newest') {
       return new Date(b.createdAt) - new Date(a.createdAt);
     } else if (sortBy === 'Most Liked') {
-      return b.likes - a.likes;
+      return (b.likes || 0) - (a.likes || 0);
+    } else {
+      // Trending: combination of likes, replies, and recency
+      const aScore = (a.likes || 0) + (a.replies || 0) + (Date.now() - new Date(a.createdAt)) / 3600000;
+      const bScore = (b.likes || 0) + (b.replies || 0) + (Date.now() - new Date(b.createdAt)) / 3600000;
+      return bScore - aScore;
     }
-    // Trending: combination of likes, replies, and recency
-    const aScore = a.likes + a.replies + (Date.now() - new Date(a.createdAt)) / 3600000;
-    const bScore = b.likes + b.replies + (Date.now() - new Date(b.createdAt)) / 3600000;
-    return bScore - aScore;
   });
 
   return (
