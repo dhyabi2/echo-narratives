@@ -79,20 +79,7 @@ const HomeScreen = () => {
         />
       </div>
 
-      <div className="mb-6 overflow-x-auto">
-        <div className="flex space-x-2">
-          {trendingTopics.map((topic) => (
-            <Button
-              key={topic}
-              variant={activeTopic === topic ? 'default' : 'outline'}
-              onClick={() => setActiveTopic(topic)}
-              className="whitespace-nowrap"
-            >
-              {topic}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <TrendingTopics />
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Today's Top Echoes</h2>
