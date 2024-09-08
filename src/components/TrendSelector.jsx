@@ -37,14 +37,21 @@ const TrendSelector = ({ onTrendChange }) => {
         return;
       }
 
-      const newTrendObject = { name: newTrend.trim(), echoCount: 1 };
-      await addOrUpdateTopic(newTrendObject);
-      setTrends([...trends, newTrendObject]);
-      setSelectedTrend(newTrend.trim());
-      onTrendChange(newTrend.trim());
-      setNewTrend('');
-      setIsAddingNew(false);
-      toast.success('New trend added successfully!');
+      try {
+        const newTrendObject = { name: newTrend.trim(), echoCount: 1 };
+        await addOrUpdateTopic(newTrendObject);
+        setTrends(prevTrends => [...prevTrends, newTrendObject]);
+        setSelectedTrend(newTrend.trim());
+        onTrendChange(newTrend.trim());
+        setNewTrend('');
+        setIsAddingNew(false);
+        toast.success('New trend added successfully!');
+      } catch (error) {
+        console.error('Error adding new trend:', error);
+        toast.error('Failed to add new trend. Please try again.');
+      }
+    } else {
+      toast.error('Please enter a valid trend name.');
     }
   };
 
@@ -69,7 +76,7 @@ const TrendSelector = ({ onTrendChange }) => {
           </SelectTrigger>
           <SelectContent>
             {trends.map((trend) => (
-              <SelectItem key={trend.id} value={trend.name}>{trend.name}</SelectItem>
+              <SelectItem key={trend.id || trend.name} value={trend.name}>{trend.name}</SelectItem>
             ))}
             <SelectItem value="add_new">+ Add new trend</SelectItem>
           </SelectContent>
