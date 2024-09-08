@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
+import CommentModal from './CommentModal';
 import { Badge } from './ui/badge';
 import { motion } from 'framer-motion';
 
@@ -17,6 +18,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const [showPlayback, setShowPlayback] = useState(false);
   const [showShareScreen, setShowShareScreen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
 
   const handleLike = async () => {
     const updatedEcho = await getEchoById(echo.id);
@@ -47,6 +49,10 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
 
   const handleReport = () => {
     setShowReportModal(true);
+  };
+
+  const handleComment = () => {
+    setShowCommentModal(true);
   };
 
   return (
@@ -87,7 +93,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
               <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
               {echo.likes}
             </Button>
-            <Button variant="ghost" size="sm" className="flex items-center justify-center">
+            <Button variant="ghost" size="sm" onClick={handleComment} className="flex items-center justify-center">
               <MessageCircle className="h-4 w-4 mr-1" />
               {echo.replies || 0}
             </Button>
@@ -114,6 +120,9 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       )}
       {showReportModal && (
         <ReportEchoModal echoId={echo.id} isOpen={showReportModal} onClose={() => setShowReportModal(false)} />
+      )}
+      {showCommentModal && (
+        <CommentModal echoId={echo.id} isOpen={showCommentModal} onClose={() => setShowCommentModal(false)} />
       )}
     </motion.div>
   );
