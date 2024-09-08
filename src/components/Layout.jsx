@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Home, Mic, Bell, User } from 'lucide-react';
+import { Menu, X, Home, Mic, Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 
@@ -11,7 +11,6 @@ const Layout = ({ children }) => {
     { icon: Home, label: 'Home', path: '/' },
     { icon: Mic, label: 'Record', path: '/record' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
-    { icon: User, label: 'Profile', path: '/profile' },
   ];
 
   return (
