@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Mic, Pause, Square, Play, Save } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -50,7 +50,7 @@ const EchoCreationScreen = () => {
           createdAt: new Date().toISOString(),
         });
         toast.success('Echo created successfully!');
-        navigate('/');
+        navigate('/', { replace: true }); // Navigate directly to home, replacing the current history entry
       };
     } catch (error) {
       console.error('Error creating echo:', error);
