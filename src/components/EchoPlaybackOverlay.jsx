@@ -44,7 +44,9 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(error => {
+          console.error('Error playing audio:', error);
+        });
       }
       setIsPlaying(!isPlaying);
     }
