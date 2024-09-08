@@ -111,7 +111,7 @@ const AudioRecorder = ({ onAudioRecorded }) => {
           disabled={recordingTime >= MAX_RECORDING_TIME}
         >
           {isRecording ? (isPaused ? <Play className="mr-2" /> : <Pause className="mr-2" />) : <Mic className="mr-2" />}
-          {isRecording ? (isPaused ? 'Resume' : 'Pause') : 'Start Recording'}
+          {isRecording ? (isPaused ? 'استئناف' : 'إيقاف مؤقت') : 'بدء التسجيل'}
         </Button>
       </div>
       {isRecording && (
@@ -123,7 +123,7 @@ const AudioRecorder = ({ onAudioRecorded }) => {
           <Progress value={(recordingTime / MAX_RECORDING_TIME) * 100} className="w-full" />
           <Button type="button" variant="outline" size="lg" className="w-full mt-2" onClick={stopRecording}>
             <Square className="mr-2" />
-            Stop Recording
+            إيقاف التسجيل
           </Button>
         </div>
       )}
