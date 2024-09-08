@@ -44,11 +44,11 @@ const Layout = ({ children }) => {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-8 mb-16">
         {children}
       </main>
 
-      <footer className="bg-white shadow-sm">
+      <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-sm">
         <nav className="container mx-auto px-4 py-2">
           <ul className="flex justify-around">
             {navItems.map((item) => (
