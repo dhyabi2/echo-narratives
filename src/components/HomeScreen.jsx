@@ -4,9 +4,10 @@ import { ArrowDownUp, Mic } from 'lucide-react';
 import EchoCard from './EchoCard';
 import TrendingTopics from './TrendingTopics';
 import RecommendedEchoes from './RecommendedEchoes';
-import { getEchoes, getTrendingTopics } from '../lib/db';
+import { getEchoes, getTrendingTopics, addEcho } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 const ECHOES_PER_PAGE = 10;
@@ -63,6 +64,12 @@ const HomeScreen = () => {
     setEchoes([]);
   };
 
+  const handleNewEcho = async (newEcho) => {
+    const addedEcho = await addEcho(newEcho);
+    setEchoes(prevEchoes => [addedEcho, ...prevEchoes]);
+    setSelectedTopic(addedEcho.trend);
+  };
+
   const filteredEchoes = selectedTopic
     ? echoes.filter(echo => echo.trend === selectedTopic)
     : echoes;
@@ -97,13 +104,20 @@ const HomeScreen = () => {
         </Button>
       </div>
 
-      <div className="space-y-6">
+      <AnimatePresence>
         {sortedEchoes.map((echo, index) => (
-          <div key={echo.id} ref={index === sortedEchoes.length - 1 ? lastEchoElementRef : null}>
+          <motion.div
+            key={echo.id}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.5 }}
+            ref={index === sortedEchoes.length - 1 ? lastEchoElementRef : null}
+          >
             <EchoCard echo={echo} onEchoUpdated={handleEchoUpdated} />
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
 

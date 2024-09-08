@@ -9,6 +9,7 @@ import EchoPlaybackOverlay from './EchoPlaybackOverlay';
 import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
 import { Badge } from './ui/badge';
+import { motion } from 'framer-motion';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
   const [isLiked, setIsLiked] = useState(echo.isLiked || false);
@@ -49,8 +50,13 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   };
 
   return (
-    <>
-      <Card className="w-full">
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -50 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="w-full mb-4">
         <CardHeader>
           <div className="flex items-center space-x-4">
             <Avatar>
@@ -111,7 +117,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       {showReportModal && (
         <ReportEchoModal echoId={echo.id} isOpen={showReportModal} onClose={() => setShowReportModal(false)} />
       )}
-    </>
+    </motion.div>
   );
 };
 
