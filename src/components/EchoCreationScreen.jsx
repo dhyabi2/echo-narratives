@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { addEcho, getTrendingTopics, addOrUpdateTopic } from '../lib/db';
+import { addEcho, getTrendingTopics, addTopic } from '../lib/db';
 import AudioRecorder from './AudioRecorder';
 import TrendSelector from './TrendSelector';
 
@@ -49,9 +49,8 @@ const EchoCreationScreen = () => {
           shares: 0,
           createdAt: new Date().toISOString(),
         });
-        await addOrUpdateTopic({ name: trend, echoCount: 1 });
         toast.success('Echo created successfully!');
-        navigate('/', { replace: true });
+        navigate('/', { replace: true }); // Navigate directly to home, replacing the current history entry
       };
     } catch (error) {
       console.error('Error creating echo:', error);

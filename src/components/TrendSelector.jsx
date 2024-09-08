@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { getTrendingTopics, addOrUpdateTopic } from '../lib/db';
+import { getTrendingTopics, addTopic } from '../lib/db';
 import { toast } from 'sonner';
 
 const TrendSelector = ({ onTrendChange }) => {
@@ -15,7 +15,7 @@ const TrendSelector = ({ onTrendChange }) => {
   useEffect(() => {
     const fetchTrends = async () => {
       const fetchedTrends = await getTrendingTopics();
-      setTrends([{ name: 'General', id: 'general' }, ...fetchedTrends]);
+      setTrends(fetchedTrends);
     };
     fetchTrends();
   }, []);
@@ -37,21 +37,14 @@ const TrendSelector = ({ onTrendChange }) => {
         return;
       }
 
-      try {
-        const newTrendObject = { name: newTrend.trim(), echoCount: 1 };
-        await addOrUpdateTopic(newTrendObject);
-        setTrends(prevTrends => [...prevTrends, newTrendObject]);
-        setSelectedTrend(newTrend.trim());
-        onTrendChange(newTrend.trim());
-        setNewTrend('');
-        setIsAddingNew(false);
-        toast.success('New trend added successfully!');
-      } catch (error) {
-        console.error('Error adding new trend:', error);
-        toast.error('Failed to add new trend. Please try again.');
-      }
-    } else {
-      toast.error('Please enter a valid trend name.');
+      const newTrendObject = { name: newTrend.trim() };
+      await addTopic(newTrendObject);
+      setTrends([...trends, newTrendObject]);
+      setSelectedTrend(newTrend.trim());
+      onTrendChange(newTrend.trim());
+      setNewTrend('');
+      setIsAddingNew(false);
+      toast.success('New trend added successfully!');
     }
   };
 
@@ -76,7 +69,7 @@ const TrendSelector = ({ onTrendChange }) => {
           </SelectTrigger>
           <SelectContent>
             {trends.map((trend) => (
-              <SelectItem key={trend.id || trend.name} value={trend.name}>{trend.name}</SelectItem>
+              <SelectItem key={trend.id} value={trend.name}>{trend.name}</SelectItem>
             ))}
             <SelectItem value="add_new">+ Add new trend</SelectItem>
           </SelectContent>
