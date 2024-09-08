@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Mic, Car, Globe } from 'lucide-react';
+import { Menu, X, Home, Mic, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import CountrySelector from './CountrySelector';
-import { useTranslation } from '../hooks/useTranslation';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const Layout = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('Global');
   const location = useLocation();
-  const { t, setLanguage, language } = useTranslation();
 
   const navItems = [
-    { icon: Home, label: t('home'), path: '/' },
-    { icon: Mic, label: t('record'), path: '/record' },
-    { icon: Car, label: t('carMode'), path: '/car-mode' },
+    { icon: Home, label: 'Home', path: '/' },
+    { icon: Mic, label: 'Record', path: '/record' },
+    { icon: Car, label: 'Car Mode', path: '/car-mode' },
   ];
 
   if (location.pathname === '/car-mode') {
@@ -27,18 +24,9 @@ const Layout = ({ children }) => {
     <div className="flex flex-col min-h-screen">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">{t('echoes')}</h1>
+          <h1 className="text-2xl font-bold">Echoes</h1>
           <div className="flex items-center space-x-4">
             <CountrySelector value={selectedCountry} onChange={setSelectedCountry} />
-            <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Language" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="ar">العربية</SelectItem>
-              </SelectContent>
-            </Select>
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="p-2">
@@ -77,10 +65,10 @@ const Layout = ({ children }) => {
                 <Link 
                   to={item.path} 
                   className={`flex flex-col items-center py-2 ${
-                    item.label === t('record') ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
+                    item.label === 'Record' ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
                   }`}
                 >
-                  <item.icon className={`h-6 w-6 ${item.label === t('record') ? 'mb-1' : ''}`} />
+                  <item.icon className={`h-6 w-6 ${item.label === 'Record' ? 'mb-1' : ''}`} />
                   <span className="text-xs mt-1">{item.label}</span>
                 </Link>
               </li>

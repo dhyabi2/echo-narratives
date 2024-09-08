@@ -5,7 +5,6 @@ import EchoCard from './EchoCard';
 import { getEchoes, addEcho } from '../lib/db';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from '../hooks/useTranslation';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 const ECHOES_PER_PAGE = 10;
@@ -17,8 +16,6 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const observer = useRef();
-  const { t } = useTranslation();
-
   const lastEchoElementRef = useCallback(node => {
     if (isLoading) return;
     if (observer.current) observer.current.disconnect();
@@ -75,18 +72,18 @@ const HomeScreen = () => {
     <div className="p-4 max-w-4xl mx-auto">
       {!isOnline && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-          <p>{t('offline')}</p>
+          <p>You are currently offline. Some features may be limited.</p>
         </div>
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t('echoFeed')}</h1>
+        <h1 className="text-3xl font-bold">Echo Feed</h1>
         <Button variant="outline" size="sm" onClick={() => {
           const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
           setSortBy(sortOptions[nextIndex]);
         }}>
           <ArrowDownUp className="h-4 w-4 mr-2" />
-          {t(sortBy.toLowerCase())}
+          {sortBy}
         </Button>
       </div>
 

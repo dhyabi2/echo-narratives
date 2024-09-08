@@ -15,11 +15,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { countries } from '../data/countries';
-import { useTranslation } from '../hooks/useTranslation';
 
 const CountrySelector = ({ value, onChange }) => {
   const [open, setOpen] = useState(false)
-  const { t } = useTranslation();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -32,14 +30,14 @@ const CountrySelector = ({ value, onChange }) => {
         >
           {value
             ? countries.find((country) => country.code === value)?.flag + " " + countries.find((country) => country.code === value)?.name
-            : t('selectCountry')}
+            : "Select country..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder={t('searchCountry')} />
-          <CommandEmpty>{t('noCountryFound')}</CommandEmpty>
+          <CommandInput placeholder="Search country..." />
+          <CommandEmpty>No country found.</CommandEmpty>
           <CommandGroup>
             {countries.map((country) => (
               <CommandItem

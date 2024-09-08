@@ -11,7 +11,6 @@ import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
 import EchoComments from './EchoComments';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from '../hooks/useTranslation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +26,6 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [comments, setComments] = useState([]);
-  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -44,7 +42,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
     await updateEcho(updatedEcho);
     setIsLiked(!isLiked);
     onEchoUpdated(updatedEcho);
-    toast.success(isLiked ? t('echoUnliked') : t('echoLiked'));
+    toast.success(isLiked ? 'Echo unliked' : 'Echo liked');
   };
 
   const handleBookmark = async () => {
@@ -54,7 +52,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       await addBookmark({ echoId: echo.id });
     }
     setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? t('echoRemovedFromBookmarks') : t('echoBookmarked'));
+    toast.success(isBookmarked ? 'Echo removed from bookmarks' : 'Echo bookmarked');
   };
 
   const handlePlay = () => setShowPlayback(true);
@@ -96,11 +94,11 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={handleBookmark}>
                   <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
-                  {isBookmarked ? t('unsave') : t('save')}
+                  {isBookmarked ? 'Unsave' : 'Save'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleReport}>
                   <Flag className="h-4 w-4 mr-2" />
-                  {t('report')}
+                  Report
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -118,7 +116,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           <div className="w-full grid grid-cols-4 gap-2">
             <Button variant="ghost" size="sm" onClick={handlePlay} className="flex items-center justify-center">
               <Play className="h-4 w-4 mr-1" />
-              {t('play')}
+              Play
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLike} className="flex items-center justify-center">
               <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
@@ -130,7 +128,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
               <Share2 className="h-4 w-4 mr-1" />
-              {t('share')}
+              Share
             </Button>
           </div>
         </CardFooter>
