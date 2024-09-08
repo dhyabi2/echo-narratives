@@ -13,48 +13,56 @@ const EchoPlaybackOverlay = ({ echo, onClose }) => {
   const audioRef = useRef(null);
 
   useEffect(() => {
-    if (echo && echo.audioData) {
-      const audio = audioRef.current;
-      audio.src = echo.audioData;
+    if (echo && echo.audioData && audioRef.current) {
+      audioRef.current.src = echo.audioData;
 
       const updateProgress = () => {
-        setProgress((audio.currentTime / audio.duration) * 100);
+        if (audioRef.current) {
+          setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+        }
       };
 
-      audio.addEventListener('timeupdate', updateProgress);
-      audio.addEventListener('ended', () => {
+      const handleEnded = () => {
         setIsPlaying(false);
         setProgress(0);
-      });
+      };
+
+      audioRef.current.addEventListener('timeupdate', updateProgress);
+      audioRef.current.addEventListener('ended', handleEnded);
 
       return () => {
-        audio.removeEventListener('timeupdate', updateProgress);
-        audio.removeEventListener('ended', () => {});
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('timeupdate', updateProgress);
+          audioRef.current.removeEventListener('ended', handleEnded);
+        }
       };
     }
   }, [echo]);
 
   const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleSeek = (value) => {
-    const audio = audioRef.current;
-    const seekTime = (value / 100) * audio.duration;
-    audio.currentTime = seekTime;
-    setProgress(value);
+    if (audioRef.current) {
+      const seekTime = (value / 100) * audioRef.current.duration;
+      audioRef.current.currentTime = seekTime;
+      setProgress(value);
+    }
   };
 
   const handleVolumeChange = (value) => {
-    const audio = audioRef.current;
-    audio.volume = value / 100;
-    setVolume(value);
+    if (audioRef.current) {
+      audioRef.current.volume = value / 100;
+      setVolume(value);
+    }
   };
 
   const handleLike = async () => {
