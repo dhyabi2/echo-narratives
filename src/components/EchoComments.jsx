@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardContent } from './ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -33,10 +32,6 @@ const EchoComments = ({ comments, onReply, onShare }) => {
           <Card className="bg-gray-50">
             <CardContent className="p-1">
               <div className="flex items-center space-x-1 mb-1">
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={comment.authorAvatar} />
-                  <AvatarFallback>{comment.author ? comment.author[0] : 'A'}</AvatarFallback>
-                </Avatar>
                 <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
               </div>
               <AudioPlayer src={comment.audioData} />
