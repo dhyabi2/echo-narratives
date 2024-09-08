@@ -96,7 +96,7 @@ const CarNavigationMode = () => {
               <Button
                 key={topic.name}
                 variant={selectedTrend === topic.name ? "default" : "outline"}
-                className="h-16 text-lg text-white hover:bg-white hover:text-black transition-colors"
+                className="h-16 text-lg bg-transparent border-white text-white hover:bg-white hover:text-black transition-colors"
                 onClick={() => handleTrendChange(topic.name)}
               >
                 {topic.name}
@@ -128,16 +128,16 @@ const CarNavigationMode = () => {
           <h2 className="text-xl mb-4">{echoes[currentEchoIndex].title}</h2>
           <EchoPlayer src={echoes[currentEchoIndex].audioData} autoPlay={isPlaying} />
           <div className="flex justify-center space-x-4 mt-8">
-            <Button onClick={togglePlayPause} size="lg" className="h-16 w-16 text-white hover:bg-white hover:text-black transition-colors">
+            <Button onClick={togglePlayPause} size="lg" className="h-16 w-16 bg-transparent border-white text-white hover:bg-white hover:text-black transition-colors">
               {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
             </Button>
-            <Button onClick={skipToNext} size="lg" className="h-16 w-16 text-white hover:bg-white hover:text-black transition-colors">
+            <Button onClick={skipToNext} size="lg" className="h-16 w-16 bg-transparent border-white text-white hover:bg-white hover:text-black transition-colors">
               <SkipForward className="h-8 w-8" />
             </Button>
           </div>
         </div>
       )}
-      <Button onClick={exitCarMode} className="mt-8" variant="secondary" size="lg">
+      <Button onClick={exitCarMode} className="mt-8 bg-white text-black hover:bg-gray-200" size="lg">
         <ArrowLeft className="h-6 w-6 mr-2" />
         Exit Car Mode
       </Button>
