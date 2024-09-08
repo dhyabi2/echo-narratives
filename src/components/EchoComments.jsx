@@ -8,7 +8,7 @@ import AudioPlayer from './AudioPlayer';
 import ReplyForm from './ReplyForm';
 import { formatDateInArabic } from '../utils/dateUtils';
 
-const EchoComments = ({ comments, onReply, onShare }) => {
+const EchoComments = ({ comments = [], onReply, onShare }) => {
   const [replyingTo, setReplyingTo] = useState(null);
 
   const handleLike = async (commentId) => {
