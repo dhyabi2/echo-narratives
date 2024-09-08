@@ -5,7 +5,7 @@ const DB_VERSION = 6;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
-    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges'];
+    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'categories'];
     stores.forEach(store => {
       if (!db.objectStoreNames.contains(store)) {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
@@ -62,10 +62,14 @@ export const clearNotifications = async () => {
 export const getBadges = () => getAll('badges');
 export const addBadge = (badge) => add('badges', badge);
 
+// Add the missing getCategories function
+export const getCategories = () => getAll('categories');
+export const addCategory = (category) => add('categories', category);
+
 // Initialize with sample data
 (async () => {
   const db = await dbPromise;
-  const stores = ['echoes', 'topics', 'badges'];
+  const stores = ['echoes', 'topics', 'badges', 'categories'];
   const sampleData = {
     echoes: [
       { 
@@ -83,6 +87,7 @@ export const addBadge = (badge) => add('badges', badge);
       { name: 'Frequent Poster', description: 'Posted 10 echoes', icon: '🏆' },
       { name: 'Popular Voice', description: 'Received 100 likes', icon: '🌟' },
     ],
+    categories: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name })),
   };
 
   for (const storeName of stores) {
