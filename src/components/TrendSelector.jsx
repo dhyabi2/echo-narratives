@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { getTrendingTopics, addTopic } from '../lib/db';
+import { toast } from 'sonner';
 
 const TrendSelector = ({ onTrendChange }) => {
   const [trends, setTrends] = useState([]);
@@ -30,12 +31,20 @@ const TrendSelector = ({ onTrendChange }) => {
 
   const handleAddNewTrend = async () => {
     if (newTrend.trim()) {
-      await addTopic({ name: newTrend.trim() });
-      setTrends([...trends, { id: Date.now(), name: newTrend.trim() }]);
+      const trendExists = trends.some(trend => trend.name.toLowerCase() === newTrend.trim().toLowerCase());
+      if (trendExists) {
+        toast.error('This trend already exists. Please choose a different name.');
+        return;
+      }
+
+      const newTrendObject = { name: newTrend.trim() };
+      await addTopic(newTrendObject);
+      setTrends([...trends, newTrendObject]);
       setSelectedTrend(newTrend.trim());
       onTrendChange(newTrend.trim());
       setNewTrend('');
       setIsAddingNew(false);
+      toast.success('New trend added successfully!');
     }
   };
 
