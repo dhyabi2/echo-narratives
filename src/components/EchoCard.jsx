@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Heart, Share2, Flag, Bookmark, MessageCircle } from 'lucide-react';
+import { Play, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -11,6 +11,12 @@ import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
 import { Badge } from './ui/badge';
 import { motion } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
   const [isLiked, setIsLiked] = useState(echo.isLiked || false);
@@ -39,21 +45,10 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
     toast.success(isBookmarked ? 'Echo removed from bookmarks' : 'Echo bookmarked');
   };
 
-  const handlePlay = () => {
-    setShowPlayback(true);
-  };
-
-  const handleShare = () => {
-    setShowShareScreen(true);
-  };
-
-  const handleReport = () => {
-    setShowReportModal(true);
-  };
-
-  const handleComment = () => {
-    setShowCommentModal(true);
-  };
+  const handlePlay = () => setShowPlayback(true);
+  const handleShare = () => setShowShareScreen(true);
+  const handleReport = () => setShowReportModal(true);
+  const handleComment = () => setShowCommentModal(true);
 
   return (
     <motion.div
@@ -64,15 +59,34 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
     >
       <Card className="w-full mb-4">
         <CardHeader>
-          <div className="flex items-center space-x-4">
-            <Avatar>
-              <AvatarImage src={echo.authorAvatar} />
-              <AvatarFallback>{echo.author ? echo.author[0] : 'A'}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle>{echo.title}</CardTitle>
-              <p className="text-sm text-gray-500">{new Date(echo.createdAt).toLocaleDateString()}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Avatar>
+                <AvatarImage src={echo.authorAvatar} />
+                <AvatarFallback>{echo.author ? echo.author[0] : 'A'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle>{echo.title}</CardTitle>
+                <p className="text-sm text-gray-500">{new Date(echo.createdAt).toLocaleDateString()}</p>
+              </div>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={handleBookmark}>
+                  <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
+                  {isBookmarked ? 'Unsave' : 'Save'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleReport}>
+                  <Flag className="h-4 w-4 mr-2" />
+                  Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent>
@@ -84,7 +98,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           </div>
         </CardContent>
         <CardFooter>
-          <div className="w-full grid grid-cols-3 gap-2">
+          <div className="w-full grid grid-cols-4 gap-2">
             <Button variant="ghost" size="sm" onClick={handlePlay} className="flex items-center justify-center">
               <Play className="h-4 w-4 mr-1" />
               Play
@@ -100,14 +114,6 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
               <Share2 className="h-4 w-4 mr-1" />
               Share
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleBookmark} className="flex items-center justify-center">
-              <Bookmark className={`h-4 w-4 mr-1 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
-              Save
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleReport} className="flex items-center justify-center">
-              <Flag className="h-4 w-4 mr-1" />
-              Report
             </Button>
           </div>
         </CardFooter>
