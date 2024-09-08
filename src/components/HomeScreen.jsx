@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { ArrowDownUp, Mic } from 'lucide-react';
 import EchoCard from './EchoCard';
@@ -6,8 +6,10 @@ import TrendingTopics from './TrendingTopics';
 import RecommendedEchoes from './RecommendedEchoes';
 import { getEchoes, getTrendingTopics } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './LoadingSpinner';
 
 const sortOptions = ['Trending', 'Newest', 'Most Liked'];
+const ECHOES_PER_PAGE = 10;
 
 const HomeScreen = () => {
   const [sortBy, setSortBy] = useState('Trending');
@@ -15,14 +17,29 @@ const HomeScreen = () => {
   const [trendingTopics, setTrendingTopics] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const observer = useRef();
+  const lastEchoElementRef = useCallback(node => {
+    if (isLoading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading]);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       const fetchedEchoes = await getEchoes();
       const fetchedTopics = await getTrendingTopics();
-      setEchoes(fetchedEchoes);
+      setEchoes(prevEchoes => [...prevEchoes, ...fetchedEchoes.slice((page - 1) * ECHOES_PER_PAGE, page * ECHOES_PER_PAGE)]);
       setTrendingTopics(fetchedTopics);
+      setIsLoading(false);
     };
     fetchData();
 
@@ -34,7 +51,7 @@ const HomeScreen = () => {
       window.removeEventListener('online', updateOnlineStatus);
       window.removeEventListener('offline', updateOnlineStatus);
     };
-  }, []);
+  }, [page]);
 
   const handleEchoUpdated = (updatedEcho) => {
     setEchoes(prevEchoes => prevEchoes.map(echo => echo.id === updatedEcho.id ? updatedEcho : echo));
@@ -42,6 +59,8 @@ const HomeScreen = () => {
 
   const handleTopicSelect = (topic) => {
     setSelectedTopic(topic === selectedTopic ? null : topic);
+    setPage(1);
+    setEchoes([]);
   };
 
   const filteredEchoes = selectedTopic
@@ -79,10 +98,14 @@ const HomeScreen = () => {
       </div>
 
       <div className="space-y-6">
-        {sortedEchoes.map((echo) => (
-          <EchoCard key={echo.id} echo={echo} onEchoUpdated={handleEchoUpdated} />
+        {sortedEchoes.map((echo, index) => (
+          <div key={echo.id} ref={index === sortedEchoes.length - 1 ? lastEchoElementRef : null}>
+            <EchoCard echo={echo} onEchoUpdated={handleEchoUpdated} />
+          </div>
         ))}
       </div>
+
+      {isLoading && <LoadingSpinner />}
 
       <RecommendedEchoes />
 
