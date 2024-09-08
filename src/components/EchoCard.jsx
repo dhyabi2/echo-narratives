@@ -31,7 +31,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
   useEffect(() => {
     const fetchComments = async () => {
       const updatedEcho = await getEchoById(echo.id);
-      setComments(updatedEcho.comments || []);
+      setComments(updatedEcho?.comments || []);
     };
     fetchComments();
   }, [echo.id]);
