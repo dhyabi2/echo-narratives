@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
-import { ArrowDownUp, Mic } from 'lucide-react';
+import { ArrowDownUp } from 'lucide-react';
 import EchoCard from './EchoCard';
 import { getEchoes, addEcho } from '../lib/db';
-import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,7 +15,6 @@ const HomeScreen = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const navigate = useNavigate();
   const observer = useRef();
   const lastEchoElementRef = useCallback(node => {
     if (isLoading) return;
@@ -105,13 +103,6 @@ const HomeScreen = () => {
       </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
-
-      <Button 
-        className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg"
-        onClick={() => navigate('/record')}
-      >
-        <Mic className="h-6 w-6" />
-      </Button>
     </div>
   );
 };
