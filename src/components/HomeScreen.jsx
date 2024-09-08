@@ -5,12 +5,14 @@ import EchoCard from './EchoCard';
 import { getEchoes, addEcho } from '../lib/db';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
-const sortOptions = ['Trending', 'Newest', 'Most Liked'];
 const ECHOES_PER_PAGE = 10;
 
 const HomeScreen = () => {
-  const [sortBy, setSortBy] = useState('Trending');
+  const { t } = useTranslation();
+  const sortOptions = [t('Trending'), t('Newest'), t('Most Liked')];
+  const [sortBy, setSortBy] = useState(t('Trending'));
   const [echoes, setEchoes] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,9 +58,9 @@ const HomeScreen = () => {
   };
 
   const sortedEchoes = [...echoes].sort((a, b) => {
-    if (sortBy === 'Newest') {
+    if (sortBy === t('Newest')) {
       return new Date(b.createdAt) - new Date(a.createdAt);
-    } else if (sortBy === 'Most Liked') {
+    } else if (sortBy === t('Most Liked')) {
       return (b.likes || 0) - (a.likes || 0);
     } else {
       // Trending: combination of likes, replies, and recency
@@ -71,18 +73,18 @@ const HomeScreen = () => {
   return (
     <div className="p-4 max-w-4xl mx-auto">
       {!isOnline && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-          <p>You are currently offline. Some features may be limited.</p>
+        <div className="bg-yellow-100 border-r-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+          <p>{t('You are currently offline. Some features may be limited.')}</p>
         </div>
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Echo Feed</h1>
+        <h1 className="text-3xl font-bold">{t('Echo Feed')}</h1>
         <Button variant="outline" size="sm" onClick={() => {
           const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
           setSortBy(sortOptions[nextIndex]);
         }}>
-          <ArrowDownUp className="h-4 w-4 mr-2" />
+          <ArrowDownUp className="h-4 w-4 ml-2" />
           {sortBy}
         </Button>
       </div>
@@ -103,6 +105,7 @@ const HomeScreen = () => {
       </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
+      {!isLoading && sortedEchoes.length === 0 && <p>{t('No echoes found')}</p>}
     </div>
   );
 };

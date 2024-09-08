@@ -4,16 +4,18 @@ import { Menu, X, Home, Mic, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import CountrySelector from './CountrySelector';
+import { useTranslation } from 'react-i18next';
 
 const Layout = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('Global');
   const location = useLocation();
+  const { t } = useTranslation();
 
   const navItems = [
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: Mic, label: 'Record', path: '/record' },
-    { icon: Car, label: 'Car Mode', path: '/car-mode' },
+    { icon: Home, label: t('Home'), path: '/' },
+    { icon: Mic, label: t('Record'), path: '/record' },
+    { icon: Car, label: t('Car Mode'), path: '/car-mode' },
   ];
 
   if (location.pathname === '/car-mode') {
@@ -21,10 +23,10 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" dir="rtl">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Echoes</h1>
+          <h1 className="text-2xl font-bold">{t('Welcome to Echoes')}</h1>
           <div className="flex items-center space-x-4">
             <CountrySelector value={selectedCountry} onChange={setSelectedCountry} />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -65,10 +67,10 @@ const Layout = ({ children }) => {
                 <Link 
                   to={item.path} 
                   className={`flex flex-col items-center py-2 ${
-                    item.label === 'Record' ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
+                    item.label === t('Record') ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
                   }`}
                 >
-                  <item.icon className={`h-6 w-6 ${item.label === 'Record' ? 'mb-1' : ''}`} />
+                  <item.icon className={`h-6 w-6 ${item.label === t('Record') ? 'mb-1' : ''}`} />
                   <span className="text-xs mt-1">{item.label}</span>
                 </Link>
               </li>

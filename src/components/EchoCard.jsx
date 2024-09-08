@@ -11,6 +11,7 @@ import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
 import EchoComments from './EchoComments';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ import {
 } from './ui/dropdown-menu';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
+  const { t } = useTranslation();
   const [isLiked, setIsLiked] = useState(echo.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(echo.isBookmarked || false);
   const [showPlayback, setShowPlayback] = useState(false);
@@ -42,7 +44,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
     await updateEcho(updatedEcho);
     setIsLiked(!isLiked);
     onEchoUpdated(updatedEcho);
-    toast.success(isLiked ? 'Echo unliked' : 'Echo liked');
+    toast.success(isLiked ? t('Echo unliked') : t('Echo liked'));
   };
 
   const handleBookmark = async () => {
@@ -52,7 +54,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       await addBookmark({ echoId: echo.id });
     }
     setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? 'Echo removed from bookmarks' : 'Echo bookmarked');
+    toast.success(isBookmarked ? t('Echo removed from bookmarks') : t('Echo bookmarked'));
   };
 
   const handlePlay = () => setShowPlayback(true);
@@ -82,7 +84,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
               </Avatar>
               <div>
                 <CardTitle>{echo.title}</CardTitle>
-                <p className="text-sm text-gray-500">{new Date(echo.createdAt).toLocaleDateString()}</p>
+                <p className="text-sm text-gray-500">{new Date(echo.createdAt).toLocaleDateString('ar-EG')}</p>
               </div>
             </div>
             <DropdownMenu>
@@ -93,12 +95,12 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={handleBookmark}>
-                  <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
-                  {isBookmarked ? 'Unsave' : 'Save'}
+                  <Bookmark className={`h-4 w-4 ml-2 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
+                  {isBookmarked ? t('Unsave') : t('Save')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleReport}>
-                  <Flag className="h-4 w-4 mr-2" />
-                  Report
+                  <Flag className="h-4 w-4 ml-2" />
+                  {t('Report')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -115,20 +117,20 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
         <CardFooter>
           <div className="w-full grid grid-cols-4 gap-2">
             <Button variant="ghost" size="sm" onClick={handlePlay} className="flex items-center justify-center">
-              <Play className="h-4 w-4 mr-1" />
-              Play
+              <Play className="h-4 w-4 ml-1" />
+              {t('Play')}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLike} className="flex items-center justify-center">
-              <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+              <Heart className={`h-4 w-4 ml-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
               {echo.likes}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleComment} className="flex items-center justify-center">
-              <MessageCircle className="h-4 w-4 mr-1" />
+              <MessageCircle className="h-4 w-4 ml-1" />
               {comments.length}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
-              <Share2 className="h-4 w-4 mr-1" />
-              Share
+              <Share2 className="h-4 w-4 ml-1" />
+              {t('Share')}
             </Button>
           </div>
         </CardFooter>
