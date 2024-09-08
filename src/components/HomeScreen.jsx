@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { ArrowDownUp, Mic } from 'lucide-react';
 import EchoCard from './EchoCard';
-import TrendingTopics from './TrendingTopics';
-import { getEchoes, getTrendingTopics, addEcho } from '../lib/db';
+import { getEchoes, addEcho } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,8 +13,6 @@ const ECHOES_PER_PAGE = 10;
 const HomeScreen = () => {
   const [sortBy, setSortBy] = useState('Trending');
   const [echoes, setEchoes] = useState([]);
-  const [trendingTopics, setTrendingTopics] = useState([]);
-  const [selectedTopic, setSelectedTopic] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -36,9 +33,7 @@ const HomeScreen = () => {
     const fetchData = async () => {
       setIsLoading(true);
       const fetchedEchoes = await getEchoes();
-      const fetchedTopics = await getTrendingTopics();
       setEchoes(prevEchoes => [...prevEchoes, ...fetchedEchoes.slice((page - 1) * ECHOES_PER_PAGE, page * ECHOES_PER_PAGE)]);
-      setTrendingTopics(fetchedTopics);
       setIsLoading(false);
     };
     fetchData();
@@ -57,23 +52,12 @@ const HomeScreen = () => {
     setEchoes(prevEchoes => prevEchoes.map(echo => echo.id === updatedEcho.id ? updatedEcho : echo));
   };
 
-  const handleTopicSelect = (topic) => {
-    setSelectedTopic(topic === selectedTopic ? null : topic);
-    setPage(1);
-    setEchoes([]);
-  };
-
   const handleNewEcho = async (newEcho) => {
     const addedEcho = await addEcho(newEcho);
     setEchoes(prevEchoes => [addedEcho, ...prevEchoes]);
-    setSelectedTopic(addedEcho.trend);
   };
 
-  const filteredEchoes = selectedTopic
-    ? echoes.filter(echo => echo.trend === selectedTopic)
-    : echoes;
-
-  const sortedEchoes = [...filteredEchoes].sort((a, b) => {
+  const sortedEchoes = [...echoes].sort((a, b) => {
     if (sortBy === 'Newest') {
       return new Date(b.createdAt) - new Date(a.createdAt);
     } else if (sortBy === 'Most Liked') {
@@ -93,8 +77,6 @@ const HomeScreen = () => {
           <p>You are currently offline. Some features may be limited.</p>
         </div>
       )}
-
-      <TrendingTopics topics={trendingTopics} selectedTopic={selectedTopic} onTopicSelect={handleTopicSelect} />
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Echo Feed</h1>

@@ -5,13 +5,11 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { addEcho, getTrendingTopics, addTopic } from '../lib/db';
+import { addEcho } from '../lib/db';
 import AudioRecorder from './AudioRecorder';
-import TrendSelector from './TrendSelector';
 
 const EchoCreationScreen = () => {
   const [title, setTitle] = useState('');
-  const [trend, setTrend] = useState('');
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const navigate = useNavigate();
@@ -31,10 +29,6 @@ const EchoCreationScreen = () => {
       toast.error('Please enter a title for your echo.');
       return;
     }
-    if (!trend) {
-      toast.error('Please select or add a trend for your echo.');
-      return;
-    }
     try {
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
@@ -42,7 +36,6 @@ const EchoCreationScreen = () => {
         const base64AudioMessage = reader.result;
         const newEcho = await addEcho({
           title,
-          trend,
           audioData: base64AudioMessage,
           likes: 0,
           replies: 0,
@@ -50,7 +43,7 @@ const EchoCreationScreen = () => {
           createdAt: new Date().toISOString(),
         });
         toast.success('Echo created successfully!');
-        navigate('/', { replace: true }); // Navigate directly to home, replacing the current history entry
+        navigate('/', { replace: true });
       };
     } catch (error) {
       console.error('Error creating echo:', error);
@@ -71,8 +64,7 @@ const EchoCreationScreen = () => {
         <Label htmlFor="echo-title">Echo Title</Label>
         <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter a title for your echo" />
       </div>
-      <TrendSelector onTrendChange={setTrend} />
-      <Button type="submit" className="w-full" disabled={!audioBlob || !title || !trend}>
+      <Button type="submit" className="w-full" disabled={!audioBlob || !title}>
         <Save className="mr-2" />
         Share Echo
       </Button>

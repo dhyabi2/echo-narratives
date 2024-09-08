@@ -1,24 +1,22 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 11;
+const DB_VERSION = 12;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
-    const stores = ['echoes', 'topics', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'categories', 'latestTrends', 'users', 'replies'];
+    const stores = ['echoes', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'users', 'replies'];
     stores.forEach(store => {
       if (!db.objectStoreNames.contains(store)) {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
       }
     });
     
-    // Add index for echoId in comments store
     const commentsStore = transaction.objectStore('comments');
     if (!commentsStore.indexNames.contains('echoId')) {
       commentsStore.createIndex('echoId', 'echoId', { unique: false });
     }
 
-    // Add index for commentId in replies store
     const repliesStore = transaction.objectStore('replies');
     if (!repliesStore.indexNames.contains('commentId')) {
       repliesStore.createIndex('commentId', 'commentId', { unique: false });
@@ -47,44 +45,10 @@ async function remove(storeName, id) {
 }
 
 export const getEchoes = () => getAll('echoes');
-export const addEcho = async (echo) => {
-  const db = await dbPromise;
-  const tx = db.transaction(['echoes', 'topics', 'latestTrends'], 'readwrite');
-  const echoStore = tx.objectStore('echoes');
-  const topicStore = tx.objectStore('topics');
-  const latestTrendsStore = tx.objectStore('latestTrends');
-
-  const echoId = await echoStore.add({ ...echo, createdAt: new Date().toISOString() });
-
-  const existingTopic = await topicStore.get(echo.trend);
-  if (existingTopic) {
-    existingTopic.echoCount += 1;
-    await topicStore.put(existingTopic);
-  } else {
-    await topicStore.add({ name: echo.trend, echoCount: 1 });
-  }
-
-  const latestTrends = await latestTrendsStore.getAll();
-  const trendIndex = latestTrends.findIndex(trend => trend.name === echo.trend);
-  if (trendIndex !== -1) {
-    latestTrends[trendIndex].echoCount += 1;
-    latestTrends[trendIndex].lastUpdated = new Date().toISOString();
-  } else {
-    latestTrends.push({ name: echo.trend, echoCount: 1, lastUpdated: new Date().toISOString() });
-  }
-  latestTrends.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
-  await latestTrendsStore.clear();
-  await Promise.all(latestTrends.slice(0, 5).map(trend => latestTrendsStore.add(trend)));
-
-  await tx.done;
-  return echoId;
-};
+export const addEcho = (echo) => add('echoes', echo);
 export const getEchoById = (id) => get('echoes', id);
 export const updateEcho = (echo) => put('echoes', echo);
 export const deleteEcho = (id) => remove('echoes', id);
-
-export const getTrendingTopics = () => getAll('topics');
-export const addTopic = (topic) => add('topics', topic);
 
 export const getComments = async (echoId) => {
   const db = await dbPromise;
@@ -149,11 +113,6 @@ export const clearNotifications = async () => {
 export const getBadges = () => getAll('badges');
 export const addBadge = (badge) => add('badges', badge);
 
-export const getCategories = () => getAll('categories');
-export const addCategory = (category) => add('categories', category);
-
-export const getLatestTrends = () => getAll('latestTrends');
-
 export const getUsers = () => getAll('users');
 export const addUser = (user) => add('users', user);
 export const updateUser = (user) => put('users', user);
@@ -161,30 +120,22 @@ export const updateUser = (user) => put('users', user);
 // Initialize with sample data
 (async () => {
   const db = await dbPromise;
-  const stores = ['echoes', 'topics', 'badges', 'categories', 'latestTrends', 'users'];
+  const stores = ['echoes', 'badges', 'users'];
   const sampleData = {
     echoes: [
       { 
         title: 'Welcome to Echoes', 
         content: 'This is your first echo!', 
-        trend: 'General', 
         likes: 0, 
         shares: 0,
         replies: 0
       }
     ],
-    topics: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name, echoCount: name === 'General' ? 1 : 0 })),
     badges: [
       { name: 'Newcomer', description: 'Welcome to Echoes!', icon: '🎉' },
       { name: 'Frequent Poster', description: 'Posted 10 echoes', icon: '🏆' },
       { name: 'Popular Voice', description: 'Received 100 likes', icon: '🌟' },
     ],
-    categories: ['General', 'Music', 'News', 'Technology', 'Sports'].map(name => ({ name })),
-    latestTrends: ['General', 'Music', 'News', 'Technology', 'Sports'].map((name, index) => ({ 
-      name, 
-      echoCount: name === 'General' ? 1 : 5 - index, 
-      lastUpdated: new Date(Date.now() - index * 86400000).toISOString() 
-    })),
     users: [
       { username: 'demo_user', password: 'hashed_password', email: 'demo@example.com' }
     ],
