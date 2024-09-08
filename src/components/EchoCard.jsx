@@ -12,29 +12,49 @@ import { Badge } from './ui/badge';
 import { motion } from 'framer-motion';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
-  const [isLiked, setIsLiked] = useState(echo.isLiked || false);
-  const [isBookmarked, setIsBookmarked] = useState(echo.isBookmarked || false);
+  const [isLiked, setIsLiked] = useState(echo?.isLiked || false);
+  const [isBookmarked, setIsBookmarked] = useState(echo?.isBookmarked || false);
   const [showPlayback, setShowPlayback] = useState(false);
   const [showShareScreen, setShowShareScreen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
 
+  if (!echo) {
+    return null; // Or return a placeholder/loading state
+  }
+
   const handleLike = async () => {
-    const updatedEcho = await getEchoById(echo.id);
-    updatedEcho.likes = isLiked ? updatedEcho.likes - 1 : updatedEcho.likes + 1;
-    updatedEcho.isLiked = !isLiked;
-    await updateEcho(updatedEcho);
-    setIsLiked(!isLiked);
-    onEchoUpdated(updatedEcho);
-    toast.success(isLiked ? 'Echo unliked' : 'Echo liked');
+    try {
+      const updatedEcho = await getEchoById(echo.id);
+      if (!updatedEcho) {
+        throw new Error('Echo not found');
+      }
+      updatedEcho.likes = (updatedEcho.likes || 0) + (isLiked ? -1 : 1);
+      updatedEcho.isLiked = !isLiked;
+      await updateEcho(updatedEcho);
+      setIsLiked(!isLiked);
+      onEchoUpdated(updatedEcho);
+      toast.success(isLiked ? 'Echo unliked' : 'Echo liked');
+    } catch (error) {
+      console.error('Error updating like:', error);
+      toast.error('Failed to update like. Please try again.');
+    }
   };
 
   const handleBookmark = async () => {
-    const updatedEcho = await getEchoById(echo.id);
-    updatedEcho.isBookmarked = !isBookmarked;
-    await updateEcho(updatedEcho);
-    setIsBookmarked(!isBookmarked);
-    onEchoUpdated(updatedEcho);
-    toast.success(isBookmarked ? 'Echo removed from bookmarks' : 'Echo bookmarked');
+    try {
+      const updatedEcho = await getEchoById(echo.id);
+      if (!updatedEcho) {
+        throw new Error('Echo not found');
+      }
+      updatedEcho.isBookmarked = !isBookmarked;
+      await updateEcho(updatedEcho);
+      setIsBookmarked(!isBookmarked);
+      onEchoUpdated(updatedEcho);
+      toast.success(isBookmarked ? 'Echo removed from bookmarks' : 'Echo bookmarked');
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+      toast.error('Failed to update bookmark. Please try again.');
+    }
   };
 
   const handlePlay = () => {
@@ -85,7 +105,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLike}>
               <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-              {echo.likes}
+              {echo.likes || 0}
             </Button>
             <Button variant="ghost" size="sm">
               <MessageCircle className="h-4 w-4 mr-1" />
