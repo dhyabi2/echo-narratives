@@ -44,7 +44,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
     await updateEcho(updatedEcho);
     setIsLiked(!isLiked);
     onEchoUpdated(updatedEcho);
-    toast.success(isLiked ? t('Echo unliked') : t('Echo liked'));
+    toast.success(isLiked ? 'تم إلغاء الإعجاب بالصدى' : 'تم الإعجاب بالصدى');
   };
 
   const handleBookmark = async () => {
@@ -54,7 +54,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       await addBookmark({ echoId: echo.id });
     }
     setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? t('Echo removed from bookmarks') : t('Echo bookmarked'));
+    toast.success(isBookmarked ? 'تمت إزالة الصدى من المحفوظات' : 'تم حفظ الصدى');
   };
 
   const handlePlay = () => setShowPlayback(true);
@@ -96,11 +96,11 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={handleBookmark}>
                   <Bookmark className={`h-4 w-4 ml-2 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
-                  {isBookmarked ? t('Unsave') : t('Save')}
+                  {isBookmarked ? 'إلغاء الحفظ' : 'حفظ'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleReport}>
                   <Flag className="h-4 w-4 ml-2" />
-                  {t('Report')}
+                  إبلاغ
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -110,15 +110,13 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           <p className="text-gray-700">{echo.content}</p>
           <div className="mt-4 flex items-center space-x-2 text-sm text-gray-500">
             <span>{echo.duration}</span>
-            <span>•</span>
-            <span>{echo.country}</span>
           </div>
         </CardContent>
         <CardFooter>
           <div className="w-full grid grid-cols-4 gap-2">
             <Button variant="ghost" size="sm" onClick={handlePlay} className="flex items-center justify-center">
               <Play className="h-4 w-4 ml-1" />
-              {t('Play')}
+              تشغيل
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLike} className="flex items-center justify-center">
               <Heart className={`h-4 w-4 ml-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
@@ -130,7 +128,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
               <Share2 className="h-4 w-4 ml-1" />
-              {t('Share')}
+              مشاركة
             </Button>
           </div>
         </CardFooter>
