@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getComments, addComment } from '../lib/db';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import VoiceCommentForm from './VoiceCommentForm';
+import AudioPlayer from './AudioPlayer';
 
 const EchoComments = ({ echoId }) => {
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -15,32 +14,27 @@ const EchoComments = ({ echoId }) => {
     fetchComments();
   }, [echoId]);
 
-  const handleAddComment = async () => {
-    if (newComment.trim()) {
-      const addedComment = await addComment(echoId, newComment);
+  const handleAddComment = async (audioBlob) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = async () => {
+      const base64AudioComment = reader.result;
+      const addedComment = await addComment(echoId, base64AudioComment);
       setComments([...comments, addedComment]);
-      setNewComment('');
-    }
+    };
   };
 
   return (
     <div className="mt-4">
-      <h3 className="font-semibold mb-2">Comments</h3>
-      <div className="space-y-2 mb-4">
+      <h3 className="font-semibold mb-2">Voice Comments</h3>
+      <VoiceCommentForm onCommentAdded={handleAddComment} />
+      <div className="space-y-4 mt-4">
         {comments.map((comment) => (
-          <div key={comment.id} className="bg-gray-100 p-2 rounded">
-            <p className="text-sm">{comment.content}</p>
-            <p className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</p>
+          <div key={comment.id} className="bg-gray-100 p-4 rounded-lg">
+            <AudioPlayer src={comment.audioData} />
+            <p className="text-xs text-gray-500 mt-2">{new Date(comment.createdAt).toLocaleString()}</p>
           </div>
         ))}
-      </div>
-      <div className="flex space-x-2">
-        <Input
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Add a comment..."
-        />
-        <Button onClick={handleAddComment}>Post</Button>
       </div>
     </div>
   );
