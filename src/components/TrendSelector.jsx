@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { getTrendingTopics, addTopic } from '../lib/db';
+import { getTrendingTopics, addOrUpdateTopic } from '../lib/db';
 import { toast } from 'sonner';
 
 const TrendSelector = ({ onTrendChange }) => {
@@ -37,8 +37,8 @@ const TrendSelector = ({ onTrendChange }) => {
         return;
       }
 
-      const newTrendObject = { name: newTrend.trim() };
-      await addTopic(newTrendObject);
+      const newTrendObject = { name: newTrend.trim(), echoCount: 1 };
+      await addOrUpdateTopic(newTrendObject);
       setTrends([...trends, newTrendObject]);
       setSelectedTrend(newTrend.trim());
       onTrendChange(newTrend.trim());

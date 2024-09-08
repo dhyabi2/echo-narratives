@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 8;
+const DB_VERSION = 9;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -11,6 +11,12 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
       }
     });
+    
+    // Add a unique index on the 'name' field of the 'topics' store
+    const topicsStore = transaction.objectStore('topics');
+    if (!topicsStore.indexNames.contains('name')) {
+      topicsStore.createIndex('name', 'name', { unique: true });
+    }
   },
 });
 
@@ -42,13 +48,7 @@ export const addEcho = async (echo) => {
   const echoId = await echoStore.add({ ...echo, createdAt: new Date().toISOString() });
 
   // Update or add the topic
-  const existingTopic = await topicStore.get(echo.trend);
-  if (existingTopic) {
-    existingTopic.echoCount += 1;
-    await topicStore.put(existingTopic);
-  } else {
-    await topicStore.add({ name: echo.trend, echoCount: 1 });
-  }
+  await addOrUpdateTopic({ name: echo.trend, echoCount: 1 }, tx);
 
   // Update latest trends
   const latestTrends = await latestTrendsStore.getAll();
@@ -70,7 +70,26 @@ export const getEchoById = (id) => get('echoes', id);
 export const updateEcho = (echo) => put('echoes', echo);
 
 export const getTrendingTopics = () => getAll('topics');
-export const addTopic = (topic) => add('topics', topic);
+export const addOrUpdateTopic = async (topic, transaction = null) => {
+  const db = await dbPromise;
+  const tx = transaction || db.transaction('topics', 'readwrite');
+  const store = tx.objectStore('topics');
+  const index = store.index('name');
+
+  try {
+    const existingTopic = await index.get(topic.name);
+    if (existingTopic) {
+      existingTopic.echoCount += topic.echoCount || 1;
+      await store.put(existingTopic);
+    } else {
+      await store.add(topic);
+    }
+    if (!transaction) await tx.done;
+  } catch (error) {
+    console.error('Error adding or updating topic:', error);
+    throw error;
+  }
+};
 
 export const getComments = async (echoId) => {
   const db = await dbPromise;
