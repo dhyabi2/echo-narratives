@@ -34,7 +34,7 @@ const SplashScreen = ({ onFinish }) => {
     >
       <motion.img
         src="/placeholder.svg"
-        alt="اعترافات Logo"
+        alt="Echoes Logo"
         className="w-32 h-32 mb-4"
         initial={{ scale: 0.5 }}
         animate={{ scale: 1 }}
@@ -46,7 +46,7 @@ const SplashScreen = ({ onFinish }) => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        اعترافات
+        Echoes
       </motion.h1>
       <motion.p
         className="text-xl text-white mb-8"
@@ -54,7 +54,7 @@ const SplashScreen = ({ onFinish }) => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        اكتشف الأصوات، شارك القصص
+        Discover voices, share stories
       </motion.p>
       <motion.div
         className="w-64 h-2 bg-white bg-opacity-30 rounded-full overflow-hidden"
