@@ -3,12 +3,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, Mic, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import CountrySelector from './CountrySelector';
 import { useTranslation } from 'react-i18next';
 
 const Layout = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState('Global');
   const location = useLocation();
   const { t } = useTranslation();
 
@@ -16,6 +14,11 @@ const Layout = ({ children }) => {
     { icon: Home, label: t('Home'), path: '/' },
     { icon: Mic, label: t('Record'), path: '/record' },
     { icon: Car, label: t('Car Mode'), path: '/car-mode' },
+  ];
+
+  const countries = [
+    { code: 'SA', name: 'المملكة العربية السعودية', flag: '🇸🇦' },
+    { code: 'AE', name: 'الإمارات العربية المتحدة', flag: '🇦🇪' },
   ];
 
   if (location.pathname === '/car-mode') {
@@ -27,31 +30,39 @@ const Layout = ({ children }) => {
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <h1 className="text-2xl font-bold">{t('Welcome to Echoes')}</h1>
-          <div className="flex items-center space-x-4">
-            <CountrySelector value={selectedCountry} onChange={setSelectedCountry} />
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="p-2">
-                  <Menu className="h-8 w-8" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <nav className="flex flex-col space-y-6 mt-8">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className="flex items-center space-x-4 text-xl"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <item.icon className="h-6 w-6" />
-                      <span>{item.label}</span>
-                    </Link>
-                  ))}
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </div>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="p-2">
+                <Menu className="h-8 w-8" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <nav className="flex flex-col space-y-6 mt-8">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="flex items-center space-x-4 text-xl"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <item.icon className="h-6 w-6" />
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+                {countries.map((country) => (
+                  <Link
+                    key={country.code}
+                    to={`/country/${country.code}`}
+                    className="flex items-center space-x-4 text-xl"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>{country.flag}</span>
+                    <span>{country.name}</span>
+                  </Link>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 
