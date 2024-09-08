@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Mic, Bell, Car } from 'lucide-react';
+import { Menu, X, Home, Mic, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import CountrySelector from './CountrySelector';
@@ -13,7 +13,6 @@ const Layout = ({ children }) => {
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: Mic, label: 'Record', path: '/record' },
-    { icon: Bell, label: 'Notifications', path: '/notifications' },
     { icon: Car, label: 'Car Mode', path: '/car-mode' },
   ];
 
@@ -30,20 +29,20 @@ const Layout = ({ children }) => {
             <CountrySelector value={selectedCountry} onChange={setSelectedCountry} />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
+                <Button variant="ghost" size="icon" className="p-2">
+                  <Menu className="h-8 w-8" />
                 </Button>
               </SheetTrigger>
               <SheetContent>
-                <nav className="flex flex-col space-y-4">
+                <nav className="flex flex-col space-y-6 mt-8">
                   {navItems.map((item) => (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className="flex items-center space-x-2 text-lg"
+                      className="flex items-center space-x-4 text-xl"
                       onClick={() => setIsOpen(false)}
                     >
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-6 w-6" />
                       <span>{item.label}</span>
                     </Link>
                   ))}
@@ -60,11 +59,16 @@ const Layout = ({ children }) => {
 
       <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-sm">
         <nav className="container mx-auto px-4 py-2">
-          <ul className="flex justify-around">
+          <ul className="flex justify-around items-center">
             {navItems.map((item) => (
-              <li key={item.path}>
-                <Link to={item.path} className="flex flex-col items-center">
-                  <item.icon className="h-6 w-6" />
+              <li key={item.path} className="flex-1">
+                <Link 
+                  to={item.path} 
+                  className={`flex flex-col items-center py-2 ${
+                    item.label === 'Record' ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
+                  }`}
+                >
+                  <item.icon className={`h-6 w-6 ${item.label === 'Record' ? 'mb-1' : ''}`} />
                   <span className="text-xs mt-1">{item.label}</span>
                 </Link>
               </li>
