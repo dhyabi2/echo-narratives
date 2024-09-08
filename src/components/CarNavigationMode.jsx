@@ -29,7 +29,7 @@ const CarNavigationMode = () => {
         } else {
           setIsPlaying(false);
         }
-      }, 10000); // Move to next echo after 10 seconds
+      }, 10000); // الانتقال إلى الصدى التالي بعد 10 ثوانٍ
     }
     return () => clearTimeout(timer);
   }, [isPlaying, currentEchoIndex, echoes]);
@@ -57,7 +57,7 @@ const CarNavigationMode = () => {
   return (
     <div className="fixed inset-0 bg-gray-100 text-gray-800 flex flex-col items-center justify-between p-4">
       <div className="w-full max-w-md space-y-4">
-        <h1 className="text-2xl font-bold mb-4 text-center">Car Mode</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">وضع السيارة</h1>
       </div>
 
       {echoes.length > 0 && (
@@ -86,7 +86,7 @@ const CarNavigationMode = () => {
         variant="ghost"
       >
         <ArrowLeft className="h-6 w-6 mr-2" />
-        Exit Car Mode
+        الخروج من وضع السيارة
       </Button>
     </div>
   );

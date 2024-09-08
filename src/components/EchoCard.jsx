@@ -80,7 +80,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             <div className="flex items-center space-x-4">
               <Avatar>
                 <AvatarImage src={echo.authorAvatar} />
-                <AvatarFallback>{echo.author ? echo.author[0] : 'A'}</AvatarFallback>
+                <AvatarFallback>{echo.author ? echo.author[0] : 'م'}</AvatarFallback>
               </Avatar>
               <div>
                 <CardTitle>{echo.title}</CardTitle>

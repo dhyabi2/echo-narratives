@@ -14,9 +14,9 @@ const Layout = ({ children }) => {
   const { country, setCountry } = useCountry();
 
   const navItems = [
-    { icon: Home, label: t('Home'), path: '/' },
-    { icon: Mic, label: t('Record'), path: '/record' },
-    { icon: Car, label: t('Car Mode'), path: '/car-mode' },
+    { icon: Home, label: 'الرئيسية', path: '/' },
+    { icon: Mic, label: 'تسجيل', path: '/record' },
+    { icon: Car, label: 'وضع السيارة', path: '/car-mode' },
   ];
 
   const countries = [
@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
     <div className="flex flex-col min-h-screen" dir="rtl">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">{t('Welcome to Echoes')}</h1>
+          <h1 className="text-2xl font-bold">مرحبًا بك في إيكوز</h1>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="p-2">
@@ -93,10 +93,10 @@ const Layout = ({ children }) => {
                 <Link 
                   to={item.path} 
                   className={`flex flex-col items-center py-2 ${
-                    item.label === t('Record') ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
+                    item.label === 'تسجيل' ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
                   }`}
                 >
-                  <item.icon className={`h-6 w-6 ${item.label === t('Record') ? 'mb-1' : ''}`} />
+                  <item.icon className={`h-6 w-6 ${item.label === 'تسجيل' ? 'mb-1' : ''}`} />
                   <span className="text-xs mt-1">{item.label}</span>
                 </Link>
               </li>

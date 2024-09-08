@@ -12,8 +12,8 @@ const ECHOES_PER_PAGE = 10;
 
 const HomeScreen = () => {
   const { t } = useTranslation();
-  const sortOptions = [t('Trending'), t('Newest'), t('Most Liked')];
-  const [sortBy, setSortBy] = useState(t('Trending'));
+  const sortOptions = ['الأكثر رواجًا', 'الأحدث', 'الأكثر إعجابًا'];
+  const [sortBy, setSortBy] = useState('الأكثر رواجًا');
   const [echoes, setEchoes] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,12 +61,12 @@ const HomeScreen = () => {
   };
 
   const sortedEchoes = [...echoes].sort((a, b) => {
-    if (sortBy === t('Newest')) {
+    if (sortBy === 'الأحدث') {
       return new Date(b.createdAt) - new Date(a.createdAt);
-    } else if (sortBy === t('Most Liked')) {
+    } else if (sortBy === 'الأكثر إعجابًا') {
       return (b.likes || 0) - (a.likes || 0);
     } else {
-      // Trending: combination of likes, replies, and recency
+      // الأكثر رواجًا: مزيج من الإعجابات والردود والحداثة
       const aScore = (a.likes || 0) + (a.replies || 0) + (Date.now() - new Date(a.createdAt)) / 3600000;
       const bScore = (b.likes || 0) + (b.replies || 0) + (Date.now() - new Date(b.createdAt)) / 3600000;
       return bScore - aScore;
@@ -77,12 +77,12 @@ const HomeScreen = () => {
     <div className="p-4 max-w-4xl mx-auto">
       {!isOnline && (
         <div className="bg-yellow-100 border-r-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-          <p>{t('You are currently offline. Some features may be limited.')}</p>
+          <p>أنت حاليًا غير متصل بالإنترنت. قد تكون بعض الميزات محدودة.</p>
         </div>
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t('Echo Feed')}</h1>
+        <h1 className="text-3xl font-bold">تغذية الأصداء</h1>
         <Button variant="outline" size="sm" onClick={() => {
           const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
           setSortBy(sortOptions[nextIndex]);
@@ -108,7 +108,7 @@ const HomeScreen = () => {
       </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
-      {!isLoading && sortedEchoes.length === 0 && <p>{t('No echoes found')}</p>}
+      {!isLoading && sortedEchoes.length === 0 && <p>لم يتم العثور على أصداء</p>}
     </div>
   );
 };
