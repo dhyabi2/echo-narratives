@@ -77,31 +77,29 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             <Badge variant="secondary">{echo.trend}</Badge>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <div className="flex space-x-2">
-            <Button variant="ghost" size="sm" onClick={handlePlay}>
+        <CardFooter>
+          <div className="w-full grid grid-cols-3 gap-2">
+            <Button variant="ghost" size="sm" onClick={handlePlay} className="flex items-center justify-center">
               <Play className="h-4 w-4 mr-1" />
               Play
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleLike}>
+            <Button variant="ghost" size="sm" onClick={handleLike} className="flex items-center justify-center">
               <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
               {echo.likes}
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="flex items-center justify-center">
               <MessageCircle className="h-4 w-4 mr-1" />
               {echo.replies || 0}
             </Button>
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="ghost" size="sm" onClick={handleShare}>
+            <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
               <Share2 className="h-4 w-4 mr-1" />
               Share
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleBookmark}>
+            <Button variant="ghost" size="sm" onClick={handleBookmark} className="flex items-center justify-center">
               <Bookmark className={`h-4 w-4 mr-1 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
               Save
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleReport}>
+            <Button variant="ghost" size="sm" onClick={handleReport} className="flex items-center justify-center">
               <Flag className="h-4 w-4 mr-1" />
               Report
             </Button>
