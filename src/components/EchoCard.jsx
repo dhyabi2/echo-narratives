@@ -116,20 +116,18 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
         <CardFooter>
           <div className="w-full grid grid-cols-4 gap-2">
             <Button variant="ghost" size="sm" onClick={handlePlay} className="flex items-center justify-center">
-              <Play className="h-4 w-4 ml-1" />
-              تشغيل
+              <Play className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLike} className="flex items-center justify-center">
-              <Heart className={`h-4 w-4 ml-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-              {echo.likes}
+              <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+              <span className="ml-1">{echo.likes}</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={handleComment} className="flex items-center justify-center">
-              <MessageCircle className="h-4 w-4 ml-1" />
-              {comments.length}
+              <MessageCircle className="h-4 w-4" />
+              <span className="ml-1">{comments.length}</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
-              <Share2 className="h-4 w-4 ml-1" />
-              مشاركة
+              <Share2 className="h-4 w-4" />
             </Button>
           </div>
         </CardFooter>
