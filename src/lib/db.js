@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 18;
+const DB_VERSION = 19;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -188,6 +188,7 @@ export const processOfflineActions = async () => {
   }
 };
 
+// Initialize sample data
 (async () => {
   const db = await dbPromise;
   const stores = ['echoes', 'badges', 'users'];
