@@ -82,7 +82,7 @@ const HomeScreen = () => {
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">تغذية الاعترافات</h1>
+        <h1 className="text-3xl font-bold">صدى الأصوات</h1>
         <Button variant="outline" size="sm" onClick={() => {
           const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
           setSortBy(sortOptions[nextIndex]);
