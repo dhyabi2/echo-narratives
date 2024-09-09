@@ -1,7 +1,7 @@
 {
-  "name": "Echoes",
-  "short_name": "Echoes",
-  "description": "Discover voices, share stories",
+  "name": "إيكوز",
+  "short_name": "إيكوز",
+  "description": "اكتشف الأصوات، شارك القصص",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -38,25 +38,25 @@
   ],
   "shortcuts": [
     {
-      "name": "Record New Echo",
-      "short_name": "Record",
-      "description": "Create a new echo",
+      "name": "تسجيل اعتراف جديد",
+      "short_name": "تسجيل",
+      "description": "إنشاء اعتراف جديد",
       "url": "/record",
       "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Trending Echoes",
-      "short_name": "Trending",
-      "description": "View trending echoes",
+      "name": "الاعترافات الرائجة",
+      "short_name": "الرائجة",
+      "description": "عرض الاعترافات الرائجة",
       "url": "/?sort=trending",
       "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
     }
   ],
   "widgets": [
     {
-      "name": "Latest Echoes",
+      "name": "أحدث الاعترافات",
       "tag": "latest-echoes",
-      "description": "Display the latest echoes",
+      "description": "عرض أحدث الاعترافات",
       "ms_ac_template": "widgets/latest-echoes.json",
       "data": {
         "interval": "1d",
