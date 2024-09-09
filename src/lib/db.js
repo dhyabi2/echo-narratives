@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 16;
+const DB_VERSION = 17;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -139,6 +139,47 @@ export const getUsers = () => getAll('users');
 export const addUser = (user) => add('users', user);
 export const updateUser = (user) => put('users', user);
 
+// Function to trigger background sync
+export const triggerBackgroundSync = () => {
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.sync.register('sync-echoes');
+    });
+  }
+};
+
+// Function to handle offline actions
+export const handleOfflineAction = async (action, data) => {
+  await add('offlineActions', { action, data, timestamp: Date.now() });
+  triggerBackgroundSync();
+};
+
+// Function to process offline actions when online
+export const processOfflineActions = async () => {
+  const actions = await getAll('offlineActions');
+  for (const action of actions) {
+    try {
+      // Process the action based on its type
+      switch (action.action) {
+        case 'addEcho':
+          await addEcho(action.data);
+          break;
+        case 'updateEcho':
+          await updateEcho(action.data);
+          break;
+        case 'addComment':
+          await addComment(action.data.echoId, action.data.comment);
+          break;
+        // Add more cases as needed
+      }
+      // Remove the processed action
+      await remove('offlineActions', action.id);
+    } catch (error) {
+      console.error('Error processing offline action:', error);
+    }
+  }
+};
+
 // Initialize with sample data for each country
 (async () => {
   const db = await dbPromise;
@@ -175,12 +216,3 @@ export const updateUser = (user) => put('users', user);
     }
   }
 })();
-
-// Function to trigger background sync
-export const triggerBackgroundSync = () => {
-  if ('serviceWorker' in navigator && 'SyncManager' in window) {
-    navigator.serviceWorker.ready.then(registration => {
-      registration.sync.register('sync-echoes');
-    });
-  }
-};

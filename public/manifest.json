@@ -18,49 +18,50 @@
       "type": "image/png"
     }
   ],
-  "scope_extensions": [
-    {
-      "origin": "https://echoes.app"
-    }
-  ],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "id": "com.echoes.app",
+  "scope": "/",
+  "dir": "rtl",
   "lang": "ar",
-  "handle_links": "preferred",
-  "protocol_handlers": [
+  "orientation": "any",
+  "categories": ["social", "lifestyle", "entertainment"],
+  "screenshots": [
     {
-      "protocol": "web+echo",
-      "url": "/echo?id=%s"
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshot2.png",
+      "sizes": "1280x720",
+      "type": "image/png"
     }
   ],
-  "share_target": {
-    "action": "/share-target",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url",
-      "files": [
-        {
-          "name": "audio",
-          "accept": ["audio/*"]
-        }
-      ]
-    }
-  },
-  "file_handlers": [
+  "shortcuts": [
     {
-      "action": "/open-audio",
-      "accept": {
-        "audio/*": [".mp3", ".wav", ".ogg"]
+      "name": "Record New Echo",
+      "short_name": "Record",
+      "description": "Create a new echo",
+      "url": "/record",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Trending Echoes",
+      "short_name": "Trending",
+      "description": "View trending echoes",
+      "url": "/?sort=trending",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "widgets": [
+    {
+      "name": "Latest Echoes",
+      "tag": "latest-echoes",
+      "description": "Display the latest echoes",
+      "ms_ac_template": "widgets/latest-echoes.json",
+      "data": {
+        "interval": "1d",
+        "number": 5
       }
     }
-  ],
-  "display_override": ["window-controls-overlay"],
-  "edge_side_panel": {},
-  "launch_handler": {
-    "client_mode": ["focus-existing", "auto"]
-  }
+  ]
 }

@@ -19,7 +19,24 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
-      .then((response) => response || fetch(event.request))
+      .then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).then(
+          (response) => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            return response;
+          }
+        );
+      })
   );
 });
 
@@ -27,18 +44,6 @@ self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-echoes') {
     event.waitUntil(syncEchoes());
   }
-});
-
-self.addEventListener('push', (event) => {
-  const data = event.data.json();
-  const options = {
-    body: data.body,
-    icon: '/icon-192x192.png',
-    badge: '/badge-icon.png'
-  };
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
 });
 
 async function syncEchoes() {
@@ -60,4 +65,15 @@ async function syncEchoes() {
       console.error('Failed to sync echo:', error);
     }
   }
+}
+
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'update-content') {
+    event.waitUntil(updateContent());
+  }
+});
+
+async function updateContent() {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.add('/api/latest-content');
 }
