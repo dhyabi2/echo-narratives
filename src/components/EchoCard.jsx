@@ -101,6 +101,7 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
             <div className="flex justify-between items-center">
               <Button variant="ghost" size="sm" onClick={togglePlayPause}>
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                <span className="ml-2">{isPlaying ? 'إيقاف' : 'تشغيل'}</span>
               </Button>
               <span className="text-sm text-gray-500">
                 {formatTime(currentTime)} / {formatTime(duration)}
