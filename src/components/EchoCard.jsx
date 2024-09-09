@@ -1,45 +1,30 @@
-import React, { useState, useRef } from 'react';
-import { Play, Pause, Heart, Share2, Flag, Bookmark, MessageCircle, MoreVertical } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Play, Pause, Heart, Share2, Flag, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardFooter } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Slider } from './ui/slider';
-import { updateEcho, getEchoById, addBookmark, removeBookmark, getComments, addComment } from '../lib/db';
+import { updateEcho, getEchoById } from '../lib/db';
 import { toast } from 'sonner';
 import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
 import CommentModal from './CommentModal';
-import EchoComments from './EchoComments';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { formatDateInArabic } from '../utils/dateUtils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
   const { t } = useTranslation();
   const [isLiked, setIsLiked] = useState(echo.isLiked || false);
-  const [isBookmarked, setIsBookmarked] = useState(echo.isBookmarked || false);
   const [showShareScreen, setShowShareScreen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
-  const [comments, setComments] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(new Audio(echo.audioData));
 
-  React.useEffect(() => {
-    const fetchComments = async () => {
-      const fetchedComments = await getComments(echo.id);
-      setComments(fetchedComments);
-    };
-    fetchComments();
-
+  useEffect(() => {
     const audio = audioRef.current;
     audio.addEventListener('loadedmetadata', () => setDuration(audio.duration));
     audio.addEventListener('timeupdate', () => setCurrentTime(audio.currentTime));
@@ -50,26 +35,21 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       audio.removeEventListener('timeupdate', () => {});
       audio.removeEventListener('ended', () => {});
     };
-  }, [echo.id, echo.audioData]);
+  }, [echo.audioData]);
 
   const handleLike = async () => {
-    const updatedEcho = await getEchoById(echo.id);
-    updatedEcho.likes = isLiked ? updatedEcho.likes - 1 : updatedEcho.likes + 1;
-    updatedEcho.isLiked = !isLiked;
-    await updateEcho(updatedEcho);
-    setIsLiked(!isLiked);
-    onEchoUpdated(updatedEcho);
-    toast.success(isLiked ? 'تم إلغاء الإعجاب بالصدى' : 'تم الإعجاب بالصدى');
-  };
-
-  const handleBookmark = async () => {
-    if (isBookmarked) {
-      await removeBookmark(echo.id);
-    } else {
-      await addBookmark({ echoId: echo.id });
+    try {
+      const updatedEcho = await getEchoById(echo.id);
+      updatedEcho.likes = isLiked ? updatedEcho.likes - 1 : updatedEcho.likes + 1;
+      updatedEcho.isLiked = !isLiked;
+      await updateEcho(updatedEcho);
+      setIsLiked(!isLiked);
+      onEchoUpdated(updatedEcho);
+      toast.success(isLiked ? 'تم إلغاء الإعجاب بالصدى' : 'تم الإعجاب بالصدى');
+    } catch (error) {
+      console.error('Error updating like:', error);
+      toast.error('حدث خطأ أثناء تحديث الإعجاب. يرجى المحاولة مرة أخرى.');
     }
-    setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? 'تمت إزالة الصدى من المحفوظات' : 'تم حفظ الصدى');
   };
 
   const togglePlayPause = () => {
@@ -91,15 +71,6 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
     setCurrentTime(value);
   };
 
-  const handleShare = () => setShowShareScreen(true);
-  const handleReport = () => setShowReportModal(true);
-  const handleComment = () => setShowCommentModal(true);
-
-  const handleCommentAdded = async (newComment) => {
-    setComments((prevComments) => [newComment, ...prevComments]);
-    setShowCommentModal(false);
-  };
-
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -114,38 +85,17 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       transition={{ duration: 0.5 }}
     >
       <Card className="w-full mb-4">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar>
-                <AvatarImage src={echo.authorAvatar} />
-                <AvatarFallback>{echo.author ? echo.author[0] : 'م'}</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle>{echo.title}</CardTitle>
-                <p className="text-sm text-gray-500">{formatDateInArabic(echo.createdAt)}</p>
-              </div>
+        <CardContent className="pt-4">
+          <div className="flex items-center space-x-4 mb-4">
+            <Avatar>
+              <AvatarImage src={echo.authorAvatar} />
+              <AvatarFallback>{echo.author ? echo.author[0] : 'م'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-semibold">{echo.title}</h3>
+              <p className="text-sm text-gray-500">{formatDateInArabic(echo.createdAt)}</p>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleBookmark}>
-                  <Bookmark className={`h-4 w-4 ml-2 ${isBookmarked ? 'fill-current text-blue-500' : ''}`} />
-                  {isBookmarked ? 'إلغاء الحفظ' : 'حفظ'}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleReport}>
-                  <Flag className="h-4 w-4 ml-2" />
-                  إبلاغ
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
-        </CardHeader>
-        <CardContent>
           <p className="text-gray-700 mb-4">{echo.content}</p>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -166,22 +116,22 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
         </CardContent>
         <CardFooter>
           <div className="w-full grid grid-cols-4 gap-2">
-            <Button variant="ghost" size="sm" onClick={handleLike} className="flex items-center justify-center">
+            <Button variant="ghost" size="sm" onClick={handleLike}>
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
               <span className="ml-1">{echo.likes}</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleComment} className="flex items-center justify-center">
+            <Button variant="ghost" size="sm" onClick={() => setShowCommentModal(true)}>
               <MessageCircle className="h-4 w-4" />
-              <span className="ml-1">{comments.length}</span>
+              <span className="ml-1">{echo.comments?.length || 0}</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center justify-center">
+            <Button variant="ghost" size="sm" onClick={() => setShowShareScreen(true)}>
               <Share2 className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowReportModal(true)}>
+              <Flag className="h-4 w-4" />
             </Button>
           </div>
         </CardFooter>
-        <div className="px-4 pb-4">
-          <EchoComments echoId={echo.id} comments={comments} onCommentAdded={handleCommentAdded} />
-        </div>
       </Card>
       {showShareScreen && (
         <ShareEchoScreen echo={echo} onClose={() => setShowShareScreen(false)} />
@@ -193,7 +143,10 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
         echoId={echo.id} 
         isOpen={showCommentModal} 
         onClose={() => setShowCommentModal(false)} 
-        onCommentAdded={handleCommentAdded} 
+        onCommentAdded={(newComment) => {
+          echo.comments = [...(echo.comments || []), newComment];
+          onEchoUpdated(echo);
+        }} 
       />
     </motion.div>
   );
