@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Heart, Share2, Flag, MessageCircle } from 'lucide-react';
+import { Play, Pause, Heart, Share2, Flag, MessageCircle, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -89,10 +89,11 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
           <div className="flex items-center space-x-4 mb-4">
             <Avatar>
               <AvatarImage src={echo.authorAvatar} />
-              <AvatarFallback>{echo.author ? echo.author[0] : 'م'}</AvatarFallback>
+              <AvatarFallback>{echo.recorderName ? echo.recorderName[0] : <User />}</AvatarFallback>
             </Avatar>
             <div>
               <h3 className="font-semibold">{echo.title}</h3>
+              {echo.recorderName && <p className="text-sm text-gray-500">{echo.recorderName}</p>}
               <p className="text-sm text-gray-500">{formatDateInArabic(echo.createdAt)}</p>
             </div>
           </div>

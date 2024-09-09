@@ -1,11 +1,11 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 17;
+const DB_VERSION = 18;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
-    const stores = ['echoes', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'users', 'replies'];
+    const stores = ['echoes', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'users', 'replies', 'userSettings'];
     stores.forEach(store => {
       if (!db.objectStoreNames.contains(store)) {
         db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
@@ -139,7 +139,20 @@ export const getUsers = () => getAll('users');
 export const addUser = (user) => add('users', user);
 export const updateUser = (user) => put('users', user);
 
-// Function to trigger background sync
+export const getUserSettings = async () => {
+  const settings = await getAll('userSettings');
+  return settings[0] || null;
+};
+
+export const updateUserSettings = async (settings) => {
+  const existingSettings = await getUserSettings();
+  if (existingSettings) {
+    return put('userSettings', { ...existingSettings, ...settings });
+  } else {
+    return add('userSettings', settings);
+  }
+};
+
 export const triggerBackgroundSync = () => {
   if ('serviceWorker' in navigator && 'SyncManager' in window) {
     navigator.serviceWorker.ready.then(registration => {
@@ -148,18 +161,15 @@ export const triggerBackgroundSync = () => {
   }
 };
 
-// Function to handle offline actions
 export const handleOfflineAction = async (action, data) => {
   await add('offlineActions', { action, data, timestamp: Date.now() });
   triggerBackgroundSync();
 };
 
-// Function to process offline actions when online
 export const processOfflineActions = async () => {
   const actions = await getAll('offlineActions');
   for (const action of actions) {
     try {
-      // Process the action based on its type
       switch (action.action) {
         case 'addEcho':
           await addEcho(action.data);
@@ -170,9 +180,7 @@ export const processOfflineActions = async () => {
         case 'addComment':
           await addComment(action.data.echoId, action.data.comment);
           break;
-        // Add more cases as needed
       }
-      // Remove the processed action
       await remove('offlineActions', action.id);
     } catch (error) {
       console.error('Error processing offline action:', error);
@@ -180,7 +188,6 @@ export const processOfflineActions = async () => {
   }
 };
 
-// Initialize with sample data for each country
 (async () => {
   const db = await dbPromise;
   const stores = ['echoes', 'badges', 'users'];

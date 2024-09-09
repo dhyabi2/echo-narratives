@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Mic, Pause, Square, Play, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mic, Pause, Square, Play, Save, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { addEcho } from '../lib/db';
+import { addEcho, getUserSettings, updateUserSettings } from '../lib/db';
 import AudioRecorder from './AudioRecorder';
 import { useCountry } from '../contexts/CountryContext';
 
@@ -13,8 +14,23 @@ const EchoCreationScreen = () => {
   const [title, setTitle] = useState('');
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [recorderName, setRecorderName] = useState('');
+  const [showRecorderName, setShowRecorderName] = useState(false);
+  const [saveRecorderName, setSaveRecorderName] = useState(false);
   const navigate = useNavigate();
   const { country } = useCountry();
+
+  useEffect(() => {
+    const loadUserSettings = async () => {
+      const settings = await getUserSettings();
+      if (settings && settings.recorderName) {
+        setRecorderName(settings.recorderName);
+        setShowRecorderName(true);
+        setSaveRecorderName(true);
+      }
+    };
+    loadUserSettings();
+  }, []);
 
   const handleAudioRecorded = (blob, url) => {
     setAudioBlob(blob);
@@ -44,7 +60,11 @@ const EchoCreationScreen = () => {
           shares: 0,
           country,
           createdAt: new Date().toISOString(),
+          recorderName: showRecorderName ? recorderName : null,
         });
+        if (saveRecorderName) {
+          await updateUserSettings({ recorderName });
+        }
         toast.success('تم إنشاء الاعتراف بنجاح!');
         navigate('/', { replace: true });
       };
@@ -66,6 +86,33 @@ const EchoCreationScreen = () => {
       <div>
         <Label htmlFor="echo-title">عنوان الاعتراف</Label>
         <Input id="echo-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="أدخل عنوانًا للاعتراف الخاص بك" />
+      </div>
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="show-recorder-name"
+          checked={showRecorderName}
+          onCheckedChange={setShowRecorderName}
+        />
+        <Label htmlFor="show-recorder-name">إظهار اسم المسجل</Label>
+      </div>
+      {showRecorderName && (
+        <div>
+          <Label htmlFor="recorder-name">اسم المسجل</Label>
+          <Input
+            id="recorder-name"
+            value={recorderName}
+            onChange={(e) => setRecorderName(e.target.value)}
+            placeholder="أدخل اسمك (اختياري)"
+          />
+        </div>
+      )}
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="save-recorder-name"
+          checked={saveRecorderName}
+          onCheckedChange={setSaveRecorderName}
+        />
+        <Label htmlFor="save-recorder-name">حفظ اسم المسجل للتسجيلات المستقبلية</Label>
       </div>
       <Button type="submit" className="w-full" disabled={!audioBlob || !title}>
         <Save className="mr-2" />
