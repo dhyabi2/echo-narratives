@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'echoes-db';
-const DB_VERSION = 15;
+const DB_VERSION = 16;
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion, newVersion, transaction) {
@@ -26,6 +26,9 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
     if (!echoesStore.indexNames.contains('country')) {
       echoesStore.createIndex('country', 'country', { unique: false });
     }
+    if (!echoesStore.indexNames.contains('syncStatus')) {
+      echoesStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+    }
 
     const usersStore = transaction.objectStore('users');
     if (!usersStore.indexNames.contains('country')) {
@@ -39,7 +42,7 @@ async function getAll(storeName) {
 }
 
 async function add(storeName, item) {
-  return (await dbPromise).add(storeName, { ...item, createdAt: new Date().toISOString() });
+  return (await dbPromise).add(storeName, { ...item, createdAt: new Date().toISOString(), syncStatus: 'unsynced' });
 }
 
 async function get(storeName, id) {
@@ -47,7 +50,7 @@ async function get(storeName, id) {
 }
 
 async function put(storeName, item) {
-  return (await dbPromise).put(storeName, item);
+  return (await dbPromise).put(storeName, { ...item, syncStatus: 'unsynced' });
 }
 
 async function remove(storeName, id) {
@@ -85,7 +88,7 @@ export const getComments = async (echoId) => {
 };
 
 export const addComment = async (echoId, comment) => {
-  const newComment = { ...comment, echoId, createdAt: new Date().toISOString() };
+  const newComment = { ...comment, echoId, createdAt: new Date().toISOString(), syncStatus: 'unsynced' };
   const id = await add('comments', newComment);
   return { ...newComment, id };
 };
@@ -102,6 +105,7 @@ export const addReply = async (commentId, audioBlob) => {
         audioData: base64AudioData,
         createdAt: new Date().toISOString(),
         likes: 0,
+        syncStatus: 'unsynced'
       };
       const id = await add('replies', newReply);
       resolve({ ...newReply, id });
@@ -149,7 +153,8 @@ export const updateUser = (user) => put('users', user);
         likes: 0, 
         shares: 0,
         replies: 0,
-        country: country
+        country: country,
+        syncStatus: 'synced'
       }
     ]),
     badges: [
@@ -170,3 +175,12 @@ export const updateUser = (user) => put('users', user);
     }
   }
 })();
+
+// Function to trigger background sync
+export const triggerBackgroundSync = () => {
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.sync.register('sync-echoes');
+    });
+  }
+};

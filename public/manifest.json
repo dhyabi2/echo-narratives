@@ -1,0 +1,66 @@
+{
+  "name": "Echoes",
+  "short_name": "Echoes",
+  "description": "Discover voices, share stories",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "https://echoes.app"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "lang": "ar",
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+echo",
+      "url": "/echo?id=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "audio",
+          "accept": ["audio/*"]
+        }
+      ]
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/open-audio",
+      "accept": {
+        "audio/*": [".mp3", ".wav", ".ogg"]
+      }
+    }
+  ],
+  "display_override": ["window-controls-overlay"],
+  "edge_side_panel": {},
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  }
+}

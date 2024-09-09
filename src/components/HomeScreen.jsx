@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { ArrowDownUp } from 'lucide-react';
 import EchoCard from './EchoCard';
-import { getEchoesByCountry, addEcho } from '../lib/db';
+import { getEchoesByCountry, addEcho, triggerBackgroundSync } from '../lib/db';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,12 @@ const HomeScreen = () => {
     };
     fetchData();
 
-    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
+    const updateOnlineStatus = () => {
+      setIsOnline(navigator.onLine);
+      if (navigator.onLine) {
+        triggerBackgroundSync();
+      }
+    };
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 
@@ -58,6 +63,7 @@ const HomeScreen = () => {
   const handleNewEcho = async (newEcho) => {
     const addedEcho = await addEcho({ ...newEcho, country });
     setEchoes(prevEchoes => [addedEcho, ...prevEchoes]);
+    triggerBackgroundSync();
   };
 
   const sortedEchoes = [...echoes].sort((a, b) => {
@@ -77,7 +83,7 @@ const HomeScreen = () => {
     <div className="p-4 max-w-4xl mx-auto">
       {!isOnline && (
         <div className="bg-yellow-100 border-r-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-          <p>أنت حاليًا غير متصل بالإنترنت. قد تكون بعض الميزات محدودة.</p>
+          <p>أنت حاليًا غير متصل بالإنترنت. سيتم مزامنة التغييرات عند استعادة الاتصال.</p>
         </div>
       )}
 
