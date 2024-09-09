@@ -84,51 +84,49 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
       exit={{ opacity: 0, y: -50 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="w-full mb-4">
-        <CardContent className="pt-4">
-          <div className="flex items-center space-x-4 mb-4">
-            <Avatar>
+      <Card className="w-full mb-2">
+        <CardContent className="p-2">
+          <div className="flex items-center space-x-2 mb-1">
+            <Avatar className="w-8 h-8">
               <AvatarImage src={echo.authorAvatar} />
               <AvatarFallback>{echo.author ? echo.author[0] : 'م'}</AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold">{echo.title}</h3>
-              <p className="text-sm text-gray-500">{formatDateInArabic(echo.createdAt)}</p>
+              <h3 className="text-sm font-semibold">{echo.title}</h3>
+              <p className="text-xs text-gray-500">{formatDateInArabic(echo.createdAt)}</p>
             </div>
           </div>
-          <p className="text-gray-700 mb-4">{echo.content}</p>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Button variant="ghost" size="sm" onClick={togglePlayPause}>
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                <span className="ml-2">{isPlaying ? 'إيقاف' : 'تشغيل'}</span>
-              </Button>
-              <span className="text-sm text-gray-500">
-                {formatTime(currentTime)} / {formatTime(duration)}
-              </span>
-            </div>
+          <p className="text-sm text-gray-700 mb-1">{echo.content}</p>
+          <div className="flex items-center space-x-2 mb-1">
+            <Button variant="ghost" size="sm" onClick={togglePlayPause} className="p-1">
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
             <Slider
               value={[currentTime]}
               max={duration}
               step={1}
               onValueChange={(value) => handleSeek(value[0])}
+              className="w-full h-4"
             />
+            <span className="text-xs text-gray-500">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
           </div>
         </CardContent>
-        <CardFooter>
-          <div className="w-full grid grid-cols-4 gap-2">
-            <Button variant="ghost" size="sm" onClick={handleLike}>
+        <CardFooter className="p-1">
+          <div className="w-full flex justify-between">
+            <Button variant="ghost" size="sm" onClick={handleLike} className="p-1">
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-              <span className="ml-1">{echo.likes}</span>
+              <span className="ml-1 text-xs">{echo.likes}</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowCommentModal(true)}>
+            <Button variant="ghost" size="sm" onClick={() => setShowCommentModal(true)} className="p-1">
               <MessageCircle className="h-4 w-4" />
-              <span className="ml-1">{echo.comments?.length || 0}</span>
+              <span className="ml-1 text-xs">{echo.comments?.length || 0}</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowShareScreen(true)}>
+            <Button variant="ghost" size="sm" onClick={() => setShowShareScreen(true)} className="p-1">
               <Share2 className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowReportModal(true)}>
+            <Button variant="ghost" size="sm" onClick={() => setShowReportModal(true)} className="p-1">
               <Flag className="h-4 w-4" />
             </Button>
           </div>
