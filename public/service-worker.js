@@ -46,6 +46,25 @@ self.addEventListener('sync', (event) => {
   }
 });
 
+self.addEventListener('push', (event) => {
+  const options = {
+    body: event.data.text(),
+    icon: '/icon-192x192.png',
+    badge: '/badge-icon.png'
+  };
+
+  event.waitUntil(
+    self.registration.showNotification('إيكوز', options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('https://echoes.app')
+  );
+});
+
 async function syncEchoes() {
   const db = await openDB('echoes-db', 1);
   const unsyncedEchoes = await db.getAll('echoes', 'unsynced');
@@ -76,4 +95,28 @@ self.addEventListener('periodicsync', (event) => {
 async function updateContent() {
   const cache = await caches.open(CACHE_NAME);
   await cache.add('/api/latest-content');
+}
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.method === 'POST' && event.request.url.endsWith('/share-target')) {
+    event.respondWith(handleShareTarget(event));
+  }
+});
+
+async function handleShareTarget(event) {
+  const formData = await event.request.formData();
+  const audio = formData.get('audio');
+  const title = formData.get('title') || 'Shared Echo';
+
+  // Store the shared audio in IndexedDB
+  const db = await openDB('echoes-db', 1);
+  await db.add('echoes', {
+    title: title,
+    audioData: await audio.arrayBuffer(),
+    createdAt: new Date().toISOString(),
+    syncStatus: 'unsynced'
+  });
+
+  // Respond with a success page
+  return Response.redirect('/share-success', 303);
 }

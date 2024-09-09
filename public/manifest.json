@@ -52,6 +52,35 @@
       "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
     }
   ],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.echoes.app",
+      "id": "com.echoes.app"
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "https://api.echoes.app"
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "audio",
+          "accept": ["audio/*"]
+        }
+      ]
+    }
+  },
   "widgets": [
     {
       "name": "أحدث الاعترافات",
@@ -62,6 +91,29 @@
         "interval": "1d",
         "number": 5
       }
+    }
+  ],
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "display_override": ["window-controls-overlay"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "file_handlers": [
+    {
+      "action": "/open-audio",
+      "accept": {
+        "audio/*": [".mp3", ".wav", ".ogg"]
+      }
+    }
+  ],
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+echo",
+      "url": "/echo?id=%s"
     }
   ]
 }
