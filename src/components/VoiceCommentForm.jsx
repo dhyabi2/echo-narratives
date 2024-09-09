@@ -18,9 +18,9 @@ const VoiceCommentForm = ({ onCommentAdded }) => {
       onCommentAdded(audioBlob);
       setAudioBlob(null);
       setAudioUrl(null);
-      toast.success('Voice comment added successfully!');
+      toast.success('تم إضافة التعليق الصوتي بنجاح!');
     } else {
-      toast.error('Please record a voice comment before submitting.');
+      toast.error('الرجاء تسجيل تعليق صوتي قبل الإرسال.');
     }
   };
 
@@ -34,7 +34,7 @@ const VoiceCommentForm = ({ onCommentAdded }) => {
       )}
       <Button onClick={handleSubmit} disabled={!audioBlob} className="w-full">
         <Save className="mr-2 h-4 w-4" />
-        Submit Voice Comment
+        إرسال التعليق الصوتي
       </Button>
     </div>
   );

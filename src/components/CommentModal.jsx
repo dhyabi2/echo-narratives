@@ -37,7 +37,7 @@ const CommentModal = ({ echoId, isOpen, onClose, onCommentAdded }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a Voice Comment</DialogTitle>
+          <DialogTitle>إضافة تعليق صوتي</DialogTitle>
         </DialogHeader>
         <VoiceCommentForm onCommentAdded={handleCommentAdded} isSubmitting={isSubmitting} />
       </DialogContent>
