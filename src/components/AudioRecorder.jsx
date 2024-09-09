@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Pause, Square, Play } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
+import { toast } from 'sonner';
 
 const MAX_RECORDING_TIME = 60; // 1 minute in seconds
 
@@ -9,6 +10,7 @@ const AudioRecorder = ({ onAudioRecorded }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [hasPermission, setHasPermission] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioContextRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -25,72 +27,80 @@ const AudioRecorder = ({ onAudioRecorded }) => {
   const requestMicrophonePermission = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      const analyser = audioContextRef.current.createAnalyser();
-      source.connect(analyser);
-
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
-      mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        onAudioRecorded(audioBlob, audioUrl);
-        audioChunksRef.current = [];
-      };
-      return true;
+      setHasPermission(true);
+      return stream;
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      alert('Unable to access microphone. Please check your browser settings.');
-      return false;
+      toast.error('لم نتمكن من الوصول إلى الميكروفون. يرجى التحقق من إعدادات المتصفح الخاص بك.');
+      return null;
     }
+  };
+
+  const initializeAudioRecorder = (stream) => {
+    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContextRef.current.createMediaStreamSource(stream);
+    const analyser = audioContextRef.current.createAnalyser();
+    source.connect(analyser);
+
+    mediaRecorderRef.current = new MediaRecorder(stream);
+    mediaRecorderRef.current.ondataavailable = (event) => {
+      audioChunksRef.current.push(event.data);
+    };
+    mediaRecorderRef.current.onstop = () => {
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      onAudioRecorded(audioBlob, audioUrl);
+      audioChunksRef.current = [];
+    };
   };
 
   const toggleRecording = async () => {
     if (!isRecording) {
-      const hasPermission = await requestMicrophonePermission();
-      if (!hasPermission) return;
+      if (!hasPermission) {
+        const stream = await requestMicrophonePermission();
+        if (!stream) return;
+        initializeAudioRecorder(stream);
+      }
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
       setIsPaused(false);
-      timerRef.current = setInterval(() => {
-        setRecordingTime((prevTime) => {
-          if (prevTime >= MAX_RECORDING_TIME - 1) {
-            stopRecording();
-            return MAX_RECORDING_TIME;
-          }
-          return prevTime + 1;
-        });
-      }, 1000);
+      startTimer();
     } else {
       if (isPaused) {
         mediaRecorderRef.current.resume();
         setIsPaused(false);
-        timerRef.current = setInterval(() => {
-          setRecordingTime((prevTime) => {
-            if (prevTime >= MAX_RECORDING_TIME - 1) {
-              stopRecording();
-              return MAX_RECORDING_TIME;
-            }
-            return prevTime + 1;
-          });
-        }, 1000);
+        startTimer();
       } else {
         mediaRecorderRef.current.pause();
         setIsPaused(true);
-        clearInterval(timerRef.current);
+        stopTimer();
       }
     }
+  };
+
+  const startTimer = () => {
+    timerRef.current = setInterval(() => {
+      setRecordingTime((prevTime) => {
+        if (prevTime >= MAX_RECORDING_TIME - 1) {
+          stopRecording();
+          return MAX_RECORDING_TIME;
+        }
+        return prevTime + 1;
+      });
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    clearInterval(timerRef.current);
   };
 
   const stopRecording = () => {
     mediaRecorderRef.current.stop();
     setIsRecording(false);
     setIsPaused(false);
-    clearInterval(timerRef.current);
+    stopTimer();
+    setRecordingTime(0);
   };
 
   const formatTime = (seconds) => {
