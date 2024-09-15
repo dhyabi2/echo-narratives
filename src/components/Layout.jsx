@@ -96,21 +96,21 @@ const Layout = ({ children }) => {
         <nav className="container mx-auto px-4 py-2">
           <ul className="flex justify-around items-center">
             <li className="flex-1">
-              <Link to={navItems[0].path} className="flex flex-col items-center py-2">
-                <navItems[0].icon className="h-6 w-6" />
-                <span className="text-xs mt-1">{navItems[0].label}</span>
+              <Link to="/car-mode" className="flex flex-col items-center py-2">
+                <Car className="h-6 w-6" />
+                <span className="text-xs mt-1">وضع السيارة</span>
               </Link>
             </li>
             <li className="flex-1 -mt-6">
-              <Link to={navItems[1].path} className="flex flex-col items-center py-2 bg-blue-500 text-white rounded-full">
-                <navItems[1].icon className="h-6 w-6 mb-1" />
-                <span className="text-xs">{navItems[1].label}</span>
+              <Link to="/record" className="flex flex-col items-center py-2 bg-blue-500 text-white rounded-full">
+                <Mic className="h-6 w-6 mb-1" />
+                <span className="text-xs">تسجيل</span>
               </Link>
             </li>
             <li className="flex-1">
-              <Link to={navItems[2].path} className="flex flex-col items-center py-2">
-                <navItems[2].icon className="h-6 w-6" />
-                <span className="text-xs mt-1">{navItems[2].label}</span>
+              <Link to="/notifications" className="flex flex-col items-center py-2">
+                <Bell className="h-6 w-6" />
+                <span className="text-xs mt-1">الإشعارات</span>
               </Link>
             </li>
           </ul>
