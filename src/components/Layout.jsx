@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, Mic, Bell, Car } from 'lucide-react';
+import { Menu, X, Mic, Bell, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,6 @@ const Layout = ({ children }) => {
   const { country, setCountry } = useCountry();
 
   const navItems = [
-    { icon: Home, label: 'الرئيسية', path: '/' },
     { icon: Mic, label: 'تسجيل', path: '/record' },
     { icon: Bell, label: 'الإشعارات', path: '/notifications' },
     { icon: Car, label: 'وضع السيارة', path: '/car-mode' },
@@ -54,6 +53,13 @@ const Layout = ({ children }) => {
             </SheetTrigger>
             <SheetContent>
               <nav className="flex flex-col space-y-6 mt-8">
+                <Link
+                  to="/"
+                  className="flex items-center space-x-4 text-xl"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span>الرئيسية</span>
+                </Link>
                 {navItems.map((item) => (
                   <Link
                     key={item.path}
