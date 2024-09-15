@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button } from './ui/button';
-import { ArrowDownUp } from 'lucide-react';
 import EchoCard from './EchoCard';
 import { getEchoesByCountry, addEcho, triggerBackgroundSync } from '../lib/db';
 import LoadingSpinner from './LoadingSpinner';
@@ -12,8 +10,6 @@ const ECHOES_PER_PAGE = 10;
 
 const HomeScreen = () => {
   const { t } = useTranslation();
-  const sortOptions = ['الأكثر رواجًا', 'الأحدث', 'الأكثر إعجابًا'];
-  const [sortBy, setSortBy] = useState('الأكثر رواجًا');
   const [echoes, setEchoes] = useState([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,19 +62,6 @@ const HomeScreen = () => {
     triggerBackgroundSync();
   };
 
-  const sortedEchoes = [...echoes].sort((a, b) => {
-    if (sortBy === 'الأحدث') {
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    } else if (sortBy === 'الأكثر إعجابًا') {
-      return (b.likes || 0) - (a.likes || 0);
-    } else {
-      // الأكثر رواجًا: مزيج من الإعجابات والردود والحداثة
-      const aScore = ((a.likes || 0) + (a.replies || 0)) * (1 / (Date.now() - new Date(a.createdAt).getTime()));
-      const bScore = ((b.likes || 0) + (b.replies || 0)) * (1 / (Date.now() - new Date(b.createdAt).getTime()));
-      return bScore - aScore;
-    }
-  });
-
   return (
     <div className="p-4 max-w-4xl mx-auto">
       {!isOnline && (
@@ -87,26 +70,17 @@ const HomeScreen = () => {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">صدى الأصوات</h1>
-        <Button variant="outline" size="sm" onClick={() => {
-          const nextIndex = (sortOptions.indexOf(sortBy) + 1) % sortOptions.length;
-          setSortBy(sortOptions[nextIndex]);
-        }}>
-          <ArrowDownUp className="h-4 w-4 ml-2" />
-          {sortBy}
-        </Button>
-      </div>
+      <h1 className="text-3xl font-bold mb-6">صدى الأصوات</h1>
 
       <AnimatePresence>
-        {sortedEchoes.map((echo, index) => (
+        {echoes.map((echo, index) => (
           <motion.div
             key={echo.id}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.5 }}
-            ref={index === sortedEchoes.length - 1 ? lastEchoElementRef : null}
+            ref={index === echoes.length - 1 ? lastEchoElementRef : null}
           >
             <EchoCard echo={echo} onEchoUpdated={handleEchoUpdated} />
           </motion.div>
@@ -114,7 +88,7 @@ const HomeScreen = () => {
       </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
-      {!isLoading && sortedEchoes.length === 0 && <p>لم يتم العثور على اعترافات</p>}
+      {!isLoading && echoes.length === 0 && <p>لم يتم العثور على اعترافات</p>}
     </div>
   );
 };
