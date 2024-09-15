@@ -14,8 +14,8 @@ const Layout = ({ children }) => {
   const { country, setCountry } = useCountry();
 
   const navItems = [
-    { icon: Mic, label: 'تسجيل', path: '/record' },
     { icon: Bell, label: 'الإشعارات', path: '/notifications' },
+    { icon: Mic, label: 'تسجيل', path: '/record' },
     { icon: Car, label: 'وضع السيارة', path: '/car-mode' },
   ];
 
@@ -95,19 +95,24 @@ const Layout = ({ children }) => {
       <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-sm">
         <nav className="container mx-auto px-4 py-2">
           <ul className="flex justify-around items-center">
-            {navItems.map((item) => (
-              <li key={item.path} className="flex-1">
-                <Link 
-                  to={item.path} 
-                  className={`flex flex-col items-center py-2 ${
-                    item.label === 'تسجيل' ? 'bg-blue-500 text-white rounded-full -mt-6' : ''
-                  }`}
-                >
-                  <item.icon className={`h-6 w-6 ${item.label === 'تسجيل' ? 'mb-1' : ''}`} />
-                  <span className="text-xs mt-1">{item.label}</span>
-                </Link>
-              </li>
-            ))}
+            <li className="flex-1">
+              <Link to={navItems[0].path} className="flex flex-col items-center py-2">
+                <navItems[0].icon className="h-6 w-6" />
+                <span className="text-xs mt-1">{navItems[0].label}</span>
+              </Link>
+            </li>
+            <li className="flex-1 -mt-6">
+              <Link to={navItems[1].path} className="flex flex-col items-center py-2 bg-blue-500 text-white rounded-full">
+                <navItems[1].icon className="h-6 w-6 mb-1" />
+                <span className="text-xs">{navItems[1].label}</span>
+              </Link>
+            </li>
+            <li className="flex-1">
+              <Link to={navItems[2].path} className="flex flex-col items-center py-2">
+                <navItems[2].icon className="h-6 w-6" />
+                <span className="text-xs mt-1">{navItems[2].label}</span>
+              </Link>
+            </li>
           </ul>
         </nav>
       </footer>
