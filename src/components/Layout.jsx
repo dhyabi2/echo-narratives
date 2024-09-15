@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, Mic, Car } from 'lucide-react';
+import { Menu, X, Home, Mic, Bell, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ const Layout = ({ children }) => {
   const navItems = [
     { icon: Home, label: 'الرئيسية', path: '/' },
     { icon: Mic, label: 'تسجيل', path: '/record' },
+    { icon: Bell, label: 'الإشعارات', path: '/notifications' },
     { icon: Car, label: 'وضع السيارة', path: '/car-mode' },
   ];
 
