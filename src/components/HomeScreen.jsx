@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import EchoCard from './EchoCard';
-import { getEchoesByCountry, addEcho, triggerBackgroundSync } from '../lib/db';
+import { getEchoesByCountry, addEcho } from '../lib/db';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -31,17 +31,19 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const fetchedEchoes = await getEchoesByCountry(country);
-      setEchoes(prevEchoes => [...prevEchoes, ...fetchedEchoes.slice((page - 1) * ECHOES_PER_PAGE, page * ECHOES_PER_PAGE)]);
-      setIsLoading(false);
+      try {
+        const response = await getEchoesByCountry(country, page, ECHOES_PER_PAGE);
+        setEchoes(prevEchoes => [...prevEchoes, ...response.echoes]);
+      } catch (error) {
+        console.error('Error fetching echoes:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
 
     const updateOnlineStatus = () => {
       setIsOnline(navigator.onLine);
-      if (navigator.onLine) {
-        triggerBackgroundSync();
-      }
     };
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
@@ -57,20 +59,23 @@ const HomeScreen = () => {
   };
 
   const handleNewEcho = async (newEcho) => {
-    const addedEcho = await addEcho({ ...newEcho, country });
-    setEchoes(prevEchoes => [addedEcho, ...prevEchoes]);
-    triggerBackgroundSync();
+    try {
+      const addedEcho = await addEcho({ ...newEcho, country });
+      setEchoes(prevEchoes => [addedEcho, ...prevEchoes]);
+    } catch (error) {
+      console.error('Error adding new echo:', error);
+    }
   };
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
       {!isOnline && (
         <div className="bg-yellow-100 border-r-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-          <p>أنت حاليًا غير متصل بالإنترنت. سيتم مزامنة التغييرات عند استعادة الاتصال.</p>
+          <p>{t('You are currently offline. Changes will be synced when you reconnect.')}</p>
         </div>
       )}
 
-      <h1 className="text-3xl font-bold mb-6">صدى الأصوات</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('Echo of Voices')}</h1>
 
       <AnimatePresence>
         {echoes.map((echo, index) => (
@@ -88,7 +93,7 @@ const HomeScreen = () => {
       </AnimatePresence>
 
       {isLoading && <LoadingSpinner />}
-      {!isLoading && echoes.length === 0 && <p>لم يتم العثور على اعترافات</p>}
+      {!isLoading && echoes.length === 0 && <p>{t('No echoes found')}</p>}
     </div>
   );
 };

@@ -45,7 +45,12 @@ export const updateProfile = async (userData) => {
   return response.data;
 };
 
-export const getEchoes = async (country, page = 1, limit = 10) => {
+export const getEchoes = async (page = 1, limit = 10) => {
+  const response = await api.get('/echoes', { params: { page, limit } });
+  return response.data;
+};
+
+export const getEchoesByCountry = async (country, page = 1, limit = 10) => {
   const response = await api.get('/echoes', { params: { country, page, limit } });
   return response.data;
 };
