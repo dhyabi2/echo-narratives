@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Bell, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
-
-const API_BASE_URL = 'https://ekos-api.replit.app';
+import { getNotifications, clearAllNotifications } from '../lib/db';
 
 const NotificationsScreen = () => {
   const [notifications, setNotifications] = useState([]);
@@ -11,11 +9,8 @@ const NotificationsScreen = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_BASE_URL}/notifications`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setNotifications(response.data);
+        const fetchedNotifications = await getNotifications();
+        setNotifications(fetchedNotifications);
       } catch (error) {
         console.error('Error fetching notifications:', error);
       }
@@ -25,10 +20,7 @@ const NotificationsScreen = () => {
 
   const handleClearAll = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_BASE_URL}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await clearAllNotifications();
       setNotifications([]);
     } catch (error) {
       console.error('Error clearing notifications:', error);
