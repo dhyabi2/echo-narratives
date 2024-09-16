@@ -1,22 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Bell, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
-import { getNotifications, clearNotifications } from '../lib/db';
+
+const API_BASE_URL = 'https://ekos-api.replit.app';
 
 const NotificationsScreen = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      const fetchedNotifications = await getNotifications();
-      setNotifications(fetchedNotifications);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API_BASE_URL}/notifications`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setNotifications(response.data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
     };
     fetchNotifications();
   }, []);
 
   const handleClearAll = async () => {
-    await clearNotifications();
-    setNotifications([]);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_BASE_URL}/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications([]);
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+    }
   };
 
   const groupedNotifications = notifications.reduce((acc, notification) => {

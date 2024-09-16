@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
 import EchoCard from './EchoCard';
-import { getEchoesByCountry, addEcho } from '../lib/db';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useCountry } from '../contexts/CountryContext';
 
 const ECHOES_PER_PAGE = 10;
+const API_BASE_URL = 'https://ekos-api.replit.app';
 
 const HomeScreen = () => {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ const HomeScreen = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const observer = useRef();
   const { country } = useCountry();
 
@@ -21,19 +23,24 @@ const HomeScreen = () => {
     if (isLoading) return;
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
+      if (entries[0].isIntersecting && page < totalPages) {
         setPage(prevPage => prevPage + 1);
       }
     });
     if (node) observer.current.observe(node);
-  }, [isLoading]);
+  }, [isLoading, page, totalPages]);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await getEchoesByCountry(country, page, ECHOES_PER_PAGE);
-        setEchoes(prevEchoes => [...prevEchoes, ...response.echoes]);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API_BASE_URL}/echoes`, {
+          params: { country, page, limit: ECHOES_PER_PAGE },
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setEchoes(prevEchoes => [...prevEchoes, ...response.data.echoes]);
+        setTotalPages(response.data.totalPages);
       } catch (error) {
         console.error('Error fetching echoes:', error);
       } finally {
@@ -60,8 +67,11 @@ const HomeScreen = () => {
 
   const handleNewEcho = async (newEcho) => {
     try {
-      const addedEcho = await addEcho({ ...newEcho, country });
-      setEchoes(prevEchoes => [addedEcho, ...prevEchoes]);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_BASE_URL}/echoes`, newEcho, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setEchoes(prevEchoes => [response.data, ...prevEchoes]);
     } catch (error) {
       console.error('Error adding new echo:', error);
     }

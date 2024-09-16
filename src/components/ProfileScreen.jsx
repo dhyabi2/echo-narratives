@@ -1,21 +1,37 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { User, Settings } from 'lucide-react';
 import { Button } from './ui/button';
-import { getEchoes, getBadges } from '../lib/db';
+
+const API_BASE_URL = 'https://ekos-api.replit.app';
 
 const ProfileScreen = () => {
+  const [profile, setProfile] = useState(null);
   const [echoes, setEchoes] = useState([]);
   const [badges, setBadges] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const fetchedEchoes = await getEchoes();
-      const fetchedBadges = await getBadges();
-      setEchoes(fetchedEchoes);
-      setBadges(fetchedBadges);
+      try {
+        const token = localStorage.getItem('token');
+        const [profileResponse, echoesResponse, badgesResponse] = await Promise.all([
+          axios.get(`${API_BASE_URL}/users/profile`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/echoes`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/badges`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        setProfile(profileResponse.data);
+        setEchoes(echoesResponse.data.echoes);
+        setBadges(badgesResponse.data);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
     };
     fetchData();
   }, []);
+
+  if (!profile) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="p-4">
@@ -28,8 +44,8 @@ const ProfileScreen = () => {
       <div className="flex items-center mb-6">
         <User className="h-16 w-16 text-gray-400 mr-4" />
         <div>
-          <h3 className="text-xl font-semibold">Anonymous User</h3>
-          <p className="text-gray-500">Guest</p>
+          <h3 className="text-xl font-semibold">{profile.username}</h3>
+          <p className="text-gray-500">{profile.email}</p>
         </div>
       </div>
       <div className="mb-6">

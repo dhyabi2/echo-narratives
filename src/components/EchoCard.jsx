@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import { Play, Pause, Heart, Share2, Flag, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Slider } from './ui/slider';
-import { updateEcho, getEchoById } from '../lib/db';
 import { toast } from 'sonner';
 import ShareEchoScreen from './ShareEchoScreen';
 import ReportEchoModal from './ReportEchoModal';
@@ -12,6 +12,8 @@ import CommentModal from './CommentModal';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { formatDateInArabic } from '../utils/dateUtils';
+
+const API_BASE_URL = 'https://ekos-api.replit.app';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
   const { t } = useTranslation();
@@ -39,10 +41,11 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
 
   const handleLike = async () => {
     try {
-      const updatedEcho = await getEchoById(echo.id);
-      updatedEcho.likes = isLiked ? updatedEcho.likes - 1 : updatedEcho.likes + 1;
-      updatedEcho.isLiked = !isLiked;
-      await updateEcho(updatedEcho);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_BASE_URL}/echoes/${echo.id}/like`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const updatedEcho = { ...echo, likes: response.data.likes, isLiked: !isLiked };
       setIsLiked(!isLiked);
       onEchoUpdated(updatedEcho);
       toast.success(isLiked ? 'تم إلغاء الإعجاب بالصدى' : 'تم الإعجاب بالصدى');
