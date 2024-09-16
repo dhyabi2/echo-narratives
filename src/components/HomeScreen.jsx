@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import EchoCard from './EchoCard';
 import LoadingSpinner from './LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useCountry } from '../contexts/CountryContext';
+import { getEchoesByCountry } from '../lib/db';
 
 const ECHOES_PER_PAGE = 10;
-const API_BASE_URL = 'https://ekos-api.replit.app';
 
 const HomeScreen = () => {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const observer = useRef();
+  const observer = React.useRef();
   const { country } = useCountry();
 
   const lastEchoElementRef = useCallback(node => {
@@ -34,13 +34,9 @@ const HomeScreen = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${API_BASE_URL}/echoes`, {
-          params: { country, page, limit: ECHOES_PER_PAGE },
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setEchoes(prevEchoes => [...prevEchoes, ...response.data.echoes]);
-        setTotalPages(response.data.totalPages);
+        const response = await getEchoesByCountry(country, page, ECHOES_PER_PAGE);
+        setEchoes(prevEchoes => [...prevEchoes, ...response.echoes]);
+        setTotalPages(response.totalPages);
       } catch (error) {
         console.error('Error fetching echoes:', error);
       } finally {
@@ -63,18 +59,6 @@ const HomeScreen = () => {
 
   const handleEchoUpdated = (updatedEcho) => {
     setEchoes(prevEchoes => prevEchoes.map(echo => echo.id === updatedEcho.id ? updatedEcho : echo));
-  };
-
-  const handleNewEcho = async (newEcho) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`${API_BASE_URL}/echoes`, newEcho, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setEchoes(prevEchoes => [response.data, ...prevEchoes]);
-    } catch (error) {
-      console.error('Error adding new echo:', error);
-    }
   };
 
   return (

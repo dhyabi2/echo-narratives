@@ -2,13 +2,6 @@ import axios from 'axios';
 
 const API_BASE_URL = 'https://ekos-api.replit.app';
 
-let token = localStorage.getItem('token');
-
-const setToken = (newToken) => {
-  token = newToken;
-  localStorage.setItem('token', newToken);
-};
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -17,6 +10,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
@@ -25,13 +19,13 @@ api.interceptors.request.use((config) => {
 
 export const register = async (userData) => {
   const response = await api.post('/users/register', userData);
-  setToken(response.data.token);
+  localStorage.setItem('token', response.data.token);
   return response.data.user;
 };
 
 export const login = async (credentials) => {
   const response = await api.post('/users/login', credentials);
-  setToken(response.data.token);
+  localStorage.setItem('token', response.data.token);
   return response.data.user;
 };
 
@@ -137,9 +131,8 @@ export const reportEcho = async (echoId, reason) => {
 
 export const logout = () => {
   localStorage.removeItem('token');
-  token = null;
 };
 
 export const isAuthenticated = () => {
-  return !!token;
+  return !!localStorage.getItem('token');
 };
