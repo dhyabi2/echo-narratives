@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import { Play, Pause, Heart, Share2, Flag, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter } from './ui/card';
@@ -11,7 +12,8 @@ import CommentModal from './CommentModal';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { formatDateInArabic } from '../utils/dateUtils';
-import { likeEcho, unlikeEcho } from '../lib/db';
+
+const API_BASE_URL = 'https://ekos-api.replit.app';
 
 const EchoCard = ({ echo, onEchoUpdated }) => {
   const { t } = useTranslation();
@@ -39,8 +41,11 @@ const EchoCard = ({ echo, onEchoUpdated }) => {
 
   const handleLike = async () => {
     try {
-      const response = isLiked ? await unlikeEcho(echo.id) : await likeEcho(echo.id);
-      const updatedEcho = { ...echo, likes: response.likes, isLiked: !isLiked };
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_BASE_URL}/echoes/${echo.id}/like`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const updatedEcho = { ...echo, likes: response.data.likes, isLiked: !isLiked };
       setIsLiked(!isLiked);
       onEchoUpdated(updatedEcho);
       toast.success(isLiked ? 'تم إلغاء الإعجاب بالصدى' : 'تم الإعجاب بالصدى');
