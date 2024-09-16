@@ -9,23 +9,13 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
-  }
-  return config;
-});
-
 export const register = async (userData) => {
   const response = await api.post('/users/register', userData);
-  localStorage.setItem('token', response.data.token);
   return response.data.user;
 };
 
 export const login = async (credentials) => {
   const response = await api.post('/users/login', credentials);
-  localStorage.setItem('token', response.data.token);
   return response.data.user;
 };
 
@@ -130,9 +120,10 @@ export const reportEcho = async (echoId, reason) => {
 };
 
 export const logout = () => {
-  localStorage.removeItem('token');
+  // No need to remove token as it's not being stored anymore
 };
 
 export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
+  // This function is no longer needed, but kept for compatibility
+  return true;
 };
