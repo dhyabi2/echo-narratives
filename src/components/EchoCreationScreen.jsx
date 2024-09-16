@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Mic, Pause, Square, Play, Save } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -8,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import AudioRecorder from './AudioRecorder';
 import { useCountry } from '../contexts/CountryContext';
+import { addEcho } from '../lib/db';
 
 const API_BASE_URL = 'https://ekos-api.replit.app';
 
@@ -38,13 +38,10 @@ const EchoCreationScreen = () => {
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
         const base64AudioMessage = reader.result;
-        const token = localStorage.getItem('token');
-        const response = await axios.post(`${API_BASE_URL}/echoes`, {
+        const newEcho = await addEcho({
           title,
           audioData: base64AudioMessage,
           country,
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('تم إنشاء الاعتراف بنجاح!');
         navigate('/', { replace: true });
