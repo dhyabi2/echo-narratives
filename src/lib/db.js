@@ -175,6 +175,18 @@ export const reportEcho = async (echoId, reason) => {
   return handleResponse(response);
 };
 
+export const getNotifications = async () => {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/notifications`);
+  return handleResponse(response);
+};
+
+export const clearAllNotifications = async () => {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/notifications/clear`, {
+    method: 'POST'
+  });
+  return handleResponse(response);
+};
+
 export const logout = () => {
   // No action needed as we're not storing tokens
 };
