@@ -1,218 +1,140 @@
-import { openDB } from 'idb';
+import axios from 'axios';
 
-const DB_NAME = 'echoes-db';
-const DB_VERSION = 17;
+const API_BASE_URL = 'https://ekos-api.replit.app';
 
-const dbPromise = openDB(DB_NAME, DB_VERSION, {
-  upgrade(db, oldVersion, newVersion, transaction) {
-    const stores = ['echoes', 'comments', 'tags', 'bookmarks', 'reports', 'notifications', 'badges', 'users', 'replies'];
-    stores.forEach(store => {
-      if (!db.objectStoreNames.contains(store)) {
-        db.createObjectStore(store, { keyPath: 'id', autoIncrement: true });
-      }
-    });
-    
-    const commentsStore = transaction.objectStore('comments');
-    if (!commentsStore.indexNames.contains('echoId')) {
-      commentsStore.createIndex('echoId', 'echoId', { unique: false });
-    }
+let token = localStorage.getItem('token');
 
-    const repliesStore = transaction.objectStore('replies');
-    if (!repliesStore.indexNames.contains('commentId')) {
-      repliesStore.createIndex('commentId', 'commentId', { unique: false });
-    }
+const setToken = (newToken) => {
+  token = newToken;
+  localStorage.setItem('token', newToken);
+};
 
-    const echoesStore = transaction.objectStore('echoes');
-    if (!echoesStore.indexNames.contains('country')) {
-      echoesStore.createIndex('country', 'country', { unique: false });
-    }
-    if (!echoesStore.indexNames.contains('syncStatus')) {
-      echoesStore.createIndex('syncStatus', 'syncStatus', { unique: false });
-    }
-
-    const usersStore = transaction.objectStore('users');
-    if (!usersStore.indexNames.contains('country')) {
-      usersStore.createIndex('country', 'country', { unique: false });
-    }
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
   },
 });
 
-async function getAll(storeName) {
-  return (await dbPromise).getAll(storeName);
-}
+api.interceptors.request.use((config) => {
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
 
-async function add(storeName, item) {
-  return (await dbPromise).add(storeName, { ...item, createdAt: new Date().toISOString(), syncStatus: 'unsynced' });
-}
+export const register = async (userData) => {
+  const response = await api.post('/users/register', userData);
+  setToken(response.data.token);
+  return response.data.user;
+};
 
-async function get(storeName, id) {
-  return (await dbPromise).get(storeName, id);
-}
+export const login = async (credentials) => {
+  const response = await api.post('/users/login', credentials);
+  setToken(response.data.token);
+  return response.data.user;
+};
 
-async function put(storeName, item) {
-  return (await dbPromise).put(storeName, { ...item, syncStatus: 'unsynced' });
-}
+export const getProfile = async () => {
+  const response = await api.get('/users/profile');
+  return response.data;
+};
 
-async function remove(storeName, id) {
-  return (await dbPromise).delete(storeName, id);
-}
+export const updateProfile = async (userData) => {
+  const response = await api.put('/users/profile', userData);
+  return response.data;
+};
 
-export const getEchoes = () => getAll('echoes');
-export const addEcho = (echo) => add('echoes', echo);
-export const getEchoById = (id) => get('echoes', id);
-export const updateEcho = (echo) => put('echoes', echo);
-export const deleteEcho = (id) => remove('echoes', id);
+export const getEchoes = async (country, page = 1, limit = 10) => {
+  const response = await api.get('/echoes', { params: { country, page, limit } });
+  return response.data;
+};
 
-export const getEchoesByCountry = async (country) => {
-  const db = await dbPromise;
-  const tx = db.transaction('echoes', 'readonly');
-  const store = tx.objectStore('echoes');
-  const index = store.index('country');
-  return index.getAll(country);
+export const addEcho = async (echoData) => {
+  const response = await api.post('/echoes', echoData);
+  return response.data;
+};
+
+export const getEchoById = async (id) => {
+  const response = await api.get(`/echoes/${id}`);
+  return response.data;
+};
+
+export const updateEcho = async (id, echoData) => {
+  const response = await api.put(`/echoes/${id}`, echoData);
+  return response.data;
+};
+
+export const deleteEcho = async (id) => {
+  const response = await api.delete(`/echoes/${id}`);
+  return response.data;
+};
+
+export const likeEcho = async (id) => {
+  const response = await api.post(`/echoes/${id}/like`);
+  return response.data;
+};
+
+export const unlikeEcho = async (id) => {
+  const response = await api.post(`/echoes/${id}/unlike`);
+  return response.data;
 };
 
 export const getComments = async (echoId) => {
-  const db = await dbPromise;
-  const tx = db.transaction(['comments', 'replies'], 'readonly');
-  const commentsStore = tx.objectStore('comments');
-  const repliesStore = tx.objectStore('replies');
-  const commentsIndex = commentsStore.index('echoId');
-  const comments = await commentsIndex.getAll(echoId);
-
-  for (let comment of comments) {
-    const repliesIndex = repliesStore.index('commentId');
-    comment.replies = await repliesIndex.getAll(comment.id);
-  }
-
-  return comments;
+  const response = await api.get(`/echoes/${echoId}/comments`);
+  return response.data;
 };
 
-export const addComment = async (echoId, comment) => {
-  const newComment = { ...comment, echoId, createdAt: new Date().toISOString(), syncStatus: 'unsynced' };
-  const id = await add('comments', newComment);
-  return { ...newComment, id };
+export const addComment = async (echoId, commentData) => {
+  const response = await api.post(`/echoes/${echoId}/comments`, commentData);
+  return response.data;
 };
 
-export const updateComment = (comment) => put('comments', comment);
-
-export const addReply = async (commentId, audioBlob) => {
-  const reader = new FileReader();
-  return new Promise((resolve, reject) => {
-    reader.onloadend = async () => {
-      const base64AudioData = reader.result;
-      const newReply = {
-        commentId,
-        audioData: base64AudioData,
-        createdAt: new Date().toISOString(),
-        likes: 0,
-        syncStatus: 'unsynced'
-      };
-      const id = await add('replies', newReply);
-      resolve({ ...newReply, id });
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(audioBlob);
-  });
+export const getReplies = async (commentId) => {
+  const response = await api.get(`/comments/${commentId}/replies`);
+  return response.data;
 };
 
-export const getTags = () => getAll('tags');
-export const addTag = (tag) => add('tags', tag);
-
-export const getBookmarks = () => getAll('bookmarks');
-export const addBookmark = (bookmark) => add('bookmarks', bookmark);
-export const removeBookmark = (id) => remove('bookmarks', id);
-
-export const reportEcho = (report) => add('reports', report);
-
-export const getNotifications = () => getAll('notifications');
-export const addNotification = (notification) => add('notifications', notification);
-export const clearNotifications = async () => {
-  const db = await dbPromise;
-  const tx = db.transaction('notifications', 'readwrite');
-  await tx.objectStore('notifications').clear();
+export const addReply = async (commentId, replyData) => {
+  const response = await api.post(`/comments/${commentId}/replies`, replyData);
+  return response.data;
 };
 
-export const getBadges = () => getAll('badges');
-export const addBadge = (badge) => add('badges', badge);
-
-export const getUsers = () => getAll('users');
-export const addUser = (user) => add('users', user);
-export const updateUser = (user) => put('users', user);
-
-// Function to trigger background sync
-export const triggerBackgroundSync = () => {
-  if ('serviceWorker' in navigator && 'SyncManager' in window) {
-    navigator.serviceWorker.ready.then(registration => {
-      registration.sync.register('sync-echoes');
-    });
-  }
+export const getTags = async () => {
+  const response = await api.get('/tags');
+  return response.data;
 };
 
-// Function to handle offline actions
-export const handleOfflineAction = async (action, data) => {
-  await add('offlineActions', { action, data, timestamp: Date.now() });
-  triggerBackgroundSync();
+export const addTag = async (tagData) => {
+  const response = await api.post('/tags', tagData);
+  return response.data;
 };
 
-// Function to process offline actions when online
-export const processOfflineActions = async () => {
-  const actions = await getAll('offlineActions');
-  for (const action of actions) {
-    try {
-      // Process the action based on its type
-      switch (action.action) {
-        case 'addEcho':
-          await addEcho(action.data);
-          break;
-        case 'updateEcho':
-          await updateEcho(action.data);
-          break;
-        case 'addComment':
-          await addComment(action.data.echoId, action.data.comment);
-          break;
-        // Add more cases as needed
-      }
-      // Remove the processed action
-      await remove('offlineActions', action.id);
-    } catch (error) {
-      console.error('Error processing offline action:', error);
-    }
-  }
+export const getBookmarks = async () => {
+  const response = await api.get('/bookmarks');
+  return response.data;
 };
 
-// Initialize with sample data for each country
-(async () => {
-  const db = await dbPromise;
-  const stores = ['echoes', 'badges', 'users'];
-  const countries = ['SA', 'AE', 'OM', 'KW', 'QA', 'BH', 'IQ', 'YE'];
-  
-  const sampleData = {
-    echoes: countries.flatMap(country => [
-      { 
-        title: `مرحبًا بك في اعترافات ${country}`, 
-        content: `هذا هو أول اعتراف في ${country}!`, 
-        likes: 0, 
-        shares: 0,
-        replies: 0,
-        country: country,
-        syncStatus: 'synced'
-      }
-    ]),
-    badges: [
-      { name: 'قادم جديد', description: 'مرحبًا بك في اعترافات!', icon: '🎉' },
-      { name: 'كاتب نشط', description: 'نشر 10 اعترافات', icon: '🏆' },
-      { name: 'صوت شعبي', description: 'حصل على 100 إعجاب', icon: '🌟' },
-    ],
-    users: countries.map(country => (
-      { username: `مستخدم_تجريبي_${country}`, password: 'كلمة_مرور_مشفرة', email: `تجريبي_${country}@مثال.com`, country: country }
-    )),
-  };
+export const addBookmark = async (echoId) => {
+  const response = await api.post('/bookmarks', { echoId });
+  return response.data;
+};
 
-  for (const storeName of stores) {
-    const count = await db.count(storeName);
-    if (count === 0) {
-      const tx = db.transaction(storeName, 'readwrite');
-      await Promise.all(sampleData[storeName].map(item => tx.store.add(item)));
-    }
-  }
-})();
+export const removeBookmark = async (echoId) => {
+  const response = await api.delete(`/bookmarks/${echoId}`);
+  return response.data;
+};
+
+export const reportEcho = async (echoId, reason) => {
+  const response = await api.post('/reports', { echoId, reason });
+  return response.data;
+};
+
+export const logout = () => {
+  localStorage.removeItem('token');
+  token = null;
+};
+
+export const isAuthenticated = () => {
+  return !!token;
+};
