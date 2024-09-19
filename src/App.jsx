@@ -16,36 +16,44 @@ const queryClient = new QueryClient();
 const App = () => {
   useEffect(() => {
     const requestMicrophonePermission = async () => {
-      try {
-        const result = await navigator.permissions.query({ name: 'microphone' });
-        if (result.state === 'granted') {
-          toast.success('Microphone permission granted');
-        } else if (result.state === 'prompt') {
-          // Request permission
-          await navigator.mediaDevices.getUserMedia({ audio: true });
-          toast.success('Microphone permission granted');
-        } else if (result.state === 'denied') {
-          // Check if it's an Android device
-          const isAndroid = /Android/i.test(navigator.userAgent);
-          if (isAndroid && 'Notification' in window) {
-            // Create a notification for Android
-            Notification.requestPermission().then((permission) => {
-              if (permission === 'granted') {
-                new Notification('Microphone Permission Required', {
-                  body: 'Click here to open settings and enable microphone access.',
-                  icon: '/icon-192x192.png'
-                }).onclick = function() {
-                  // This will attempt to open Android settings
-                  window.open('app-settings:');
-                };
-              }
-            });
+      if ('serviceWorker' in navigator && 'Notification' in window) {
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const permission = await registration.pushManager.permissionState({ userVisibleOnly: true });
+          
+          if (permission === 'granted') {
+            const result = await navigator.permissions.query({ name: 'microphone' });
+            if (result.state === 'granted') {
+              toast.success('تم منح إذن الميكروفون');
+            } else if (result.state === 'prompt') {
+              await navigator.mediaDevices.getUserMedia({ audio: true });
+              toast.success('تم منح إذن الميكروفون');
+            } else {
+              showMicrophonePermissionNotification();
+            }
+          } else {
+            await Notification.requestPermission();
+            showMicrophonePermissionNotification();
           }
-          toast.error('Microphone permission denied. Please enable it in your browser settings.');
+        } catch (error) {
+          console.error('خطأ في طلب إذن الميكروفون:', error);
+          toast.error('حدث خطأ أثناء طلب إذن الميكروفون. يرجى المحاولة مرة أخرى.');
         }
-      } catch (error) {
-        console.error('Error requesting microphone permission:', error);
-        toast.error('Error requesting microphone permission. Please try again.');
+      } else {
+        console.warn('Service Worker or Notification API not supported');
+      }
+    };
+
+    const showMicrophonePermissionNotification = () => {
+      if ('serviceWorker' in navigator && 'Notification' in window) {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification('مطلوب إذن الميكروفون', {
+            body: 'انقر هنا لفتح الإعدادات وتمكين الوصول إلى الميكروفون.',
+            icon: '/icon-192x192.png',
+            tag: 'microphone-permission',
+            data: { url: 'app-settings:' }
+          });
+        });
       }
     };
 
