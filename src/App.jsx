@@ -18,11 +18,23 @@ const App = () => {
     const requestMicrophonePermission = async () => {
       try {
         const result = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Permission granted
         toast.success('تم منح إذن الميكروفون بنجاح');
       } catch (error) {
         console.error('Error requesting microphone permission:', error);
-        toast.error('فشل في الحصول على إذن الميكروفون. بعض الميزات قد لا تعمل.');
+        toast.error('فشل في الحصول على إذن الميكروفون. سيتم توجيهك إلى صفحة الإعدادات.');
+        
+        // Attempt to open permission settings
+        if (navigator.permissions && navigator.permissions.query) {
+          try {
+            const result = await navigator.permissions.query({ name: 'microphone' });
+            if (result.state === 'prompt' || result.state === 'denied') {
+              // Open settings page (this works on some mobile devices)
+              window.open('app-settings:', '_system');
+            }
+          } catch (permError) {
+            console.error('Error querying permission:', permError);
+          }
+        }
       }
     };
 
