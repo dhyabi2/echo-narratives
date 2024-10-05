@@ -15,49 +15,51 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    const requestMicrophonePermission = async () => {
+    const requestPermissions = async () => {
       if ('serviceWorker' in navigator && 'Notification' in window) {
         try {
           const registration = await navigator.serviceWorker.ready;
-          const permission = await registration.pushManager.permissionState({ userVisibleOnly: true });
           
-          if (permission === 'granted') {
-            const result = await navigator.permissions.query({ name: 'microphone' });
-            if (result.state === 'granted') {
+          // Request notification permission
+          const notificationPermission = await Notification.requestPermission();
+          
+          if (notificationPermission === 'granted') {
+            const microphonePermission = await navigator.permissions.query({ name: 'microphone' });
+            
+            if (microphonePermission.state === 'granted') {
               toast.success('تم منح إذن الميكروفون');
-            } else if (result.state === 'prompt') {
+            } else if (microphonePermission.state === 'prompt') {
               await navigator.mediaDevices.getUserMedia({ audio: true });
               toast.success('تم منح إذن الميكروفون');
             } else {
-              showMicrophonePermissionNotification();
+              showMicrophonePermissionNotification(registration);
             }
           } else {
-            await Notification.requestPermission();
-            showMicrophonePermissionNotification();
+            toast.error('لم يتم منح إذن الإشعارات. بعض الميزات قد لا تعمل بشكل صحيح.');
           }
         } catch (error) {
-          console.error('خطأ في طلب إذن الميكروفون:', error);
-          toast.error('حدث خطأ أثناء طلب إذن الميكروفون. يرجى المحاولة مرة أخرى.');
+          console.error('خطأ في طلب الأذونات:', error);
+          toast.error('حدث خطأ أثناء طلب الأذونات. يرجى المحاولة مرة أخرى.');
         }
       } else {
         console.warn('Service Worker or Notification API not supported');
       }
     };
 
-    const showMicrophonePermissionNotification = () => {
-      if ('serviceWorker' in navigator && 'Notification' in window) {
-        navigator.serviceWorker.ready.then((registration) => {
-          registration.showNotification('مطلوب إذن الميكروفون', {
-            body: 'انقر هنا لفتح الإعدادات وتمكين الوصول إلى الميكروفون.',
-            icon: '/icon-192x192.png',
-            tag: 'microphone-permission',
-            data: { url: 'app-settings:' }
-          });
+    const showMicrophonePermissionNotification = (registration) => {
+      if (Notification.permission === 'granted') {
+        registration.showNotification('مطلوب إذن الميكروفون', {
+          body: 'انقر هنا لفتح الإعدادات وتمكين الوصول إلى الميكروفون.',
+          icon: '/icon-192x192.png',
+          tag: 'microphone-permission',
+          data: { url: 'app-settings:' }
         });
+      } else {
+        toast.error('لم يتم منح إذن الإشعارات. لا يمكن عرض إشعار إذن الميكروفون.');
       }
     };
 
-    requestMicrophonePermission();
+    requestPermissions();
   }, []);
 
   return (
