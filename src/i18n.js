@@ -32,7 +32,8 @@ const resources = {
       "No echoes found": "لم يتم العثور على أصداء",
       "Something went wrong": "حدث خطأ ما",
       "Try Again": "حاول مرة أخرى",
-      "Echo of Voices": "صدى الأصوات"
+      "Echo of Voices": "صدى الأصوات",
+      "Clear All": "مسح الكل"
     }
   }
 };

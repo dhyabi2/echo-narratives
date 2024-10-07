@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { getNotifications, clearAllNotifications } from '../lib/db';
+import { useTranslation } from 'react-i18next';
 
 const NotificationsScreen = () => {
   const [notifications, setNotifications] = useState([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -39,10 +41,10 @@ const NotificationsScreen = () => {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Notifications</h2>
+        <h2 className="text-2xl font-bold">{t('Notifications')}</h2>
         <Button variant="ghost" size="sm" onClick={handleClearAll}>
           <Trash2 className="mr-2 h-4 w-4" />
-          Clear All
+          {t('Clear All')}
         </Button>
       </div>
       {Object.entries(groupedNotifications).map(([date, notifs]) => (
