@@ -31,7 +31,8 @@ const resources = {
       "Loading...": "جاري التحميل...",
       "No echoes found": "لم يتم العثور على أصداء",
       "Something went wrong": "حدث خطأ ما",
-      "Try Again": "حاول مرة أخرى"
+      "Try Again": "حاول مرة أخرى",
+      "Echo of Voices": "صدى الأصوات"
     }
   }
 };

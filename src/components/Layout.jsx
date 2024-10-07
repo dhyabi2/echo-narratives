@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
     <div className="flex flex-col min-h-screen" dir="rtl">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">مرحبًا بك في إيكوز</h1>
+          <h1 className="text-2xl font-bold">{t('Echo of Voices')}</h1>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="p-2">
