@@ -19,6 +19,7 @@ const Layout = ({ children }) => {
     { icon: Car, label: 'وضع السيارة', path: '/car-mode' },
   ];
 
+  // Countries are still defined but not rendered in the menu
   const countries = [
     { code: 'SA', name: 'المملكة العربية السعودية', flag: '🇸🇦' },
     { code: 'AE', name: 'الإمارات العربية المتحدة', flag: '🇦🇪' },
@@ -71,17 +72,7 @@ const Layout = ({ children }) => {
                     <span>{item.label}</span>
                   </Link>
                 ))}
-                {countries.map((c) => (
-                  <Button
-                    key={c.code}
-                    variant="ghost"
-                    className="flex items-center space-x-4 text-xl justify-start"
-                    onClick={() => handleCountryChange(c.code)}
-                  >
-                    <span>{c.flag}</span>
-                    <span>{c.name}</span>
-                  </Button>
-                ))}
+                {/* Country menu items are removed from here */}
               </nav>
             </SheetContent>
           </Sheet>
